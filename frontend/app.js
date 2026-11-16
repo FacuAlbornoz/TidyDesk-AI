@@ -104,30 +104,33 @@ function switchTab(tab) {
   viewRules.classList.add("hidden");
   viewHistory.classList.add("hidden");
 
-  // Estilos inactivos
-  btnOrganizer.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all";
-  if (btnGuardian) btnGuardian.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5";
-  if (btnCleaner) btnCleaner.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5";
-  btnRules.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5";
-  btnHistory.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5";
+  // Estilos inactivos y activos uniformes con flex horizontal y sin salto de línea
+  const inactiveTabClass = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all inline-flex items-center gap-1.5 whitespace-nowrap shrink-0";
+  const activeTabClass = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all inline-flex items-center gap-1.5 whitespace-nowrap shrink-0";
+
+  if (btnOrganizer) btnOrganizer.className = inactiveTabClass;
+  if (btnGuardian) btnGuardian.className = inactiveTabClass;
+  if (btnCleaner) btnCleaner.className = inactiveTabClass;
+  if (btnRules) btnRules.className = inactiveTabClass;
+  if (btnHistory) btnHistory.className = inactiveTabClass;
 
   if (tab === "organizer") {
     viewOrganizer.classList.remove("hidden");
-    btnOrganizer.className = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all";
+    if (btnOrganizer) btnOrganizer.className = activeTabClass;
   } else if (tab === "guardian") {
     if (viewGuardian) viewGuardian.classList.remove("hidden");
-    if (btnGuardian) btnGuardian.className = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all flex items-center gap-1.5";
+    if (btnGuardian) btnGuardian.className = activeTabClass;
     loadGuardianStatus();
   } else if (tab === "cleaner") {
     if (viewCleaner) viewCleaner.classList.remove("hidden");
-    if (btnCleaner) btnCleaner.className = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all flex items-center gap-1.5";
+    if (btnCleaner) btnCleaner.className = activeTabClass;
   } else if (tab === "rules") {
     viewRules.classList.remove("hidden");
-    btnRules.className = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all flex items-center gap-1.5";
+    if (btnRules) btnRules.className = activeTabClass;
     loadRules();
   } else if (tab === "history") {
     viewHistory.classList.remove("hidden");
-    btnHistory.className = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all flex items-center gap-1.5";
+    if (btnHistory) btnHistory.className = activeTabClass;
     loadHistory();
   }
 }
