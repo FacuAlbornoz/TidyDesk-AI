@@ -4,6 +4,24 @@ Todas las notas de las versiones y evoluciones del proyecto se documentan en est
 
 ---
 
+## [v2.2.0] - 2026-11-16
+### 🏆 Edición Pro Studio: Escáner de Hardware, Gestor de Modelos & Rediseño Visual
+- **Rediseño Integral "Pro Studio UI":** Interfaz de escritorio oscura con efectos *glassmorphism*, iluminación radial ambiental, tipografía técnica (`Inter` + `JetBrains Mono`), iconografía vectorial SVG y corrección total de alineación sin desbordes.
+- **Logo e Icono Oficial HD en Barra de Tareas de Windows 11:**
+  - Generador vectorial de alta definición (`create_pro_brand_icon`) en resoluciones 512x512, 192x192 y `.ico` multi-capa.
+  - Integración de `Web App Manifest` (`/manifest.json`), `AppUserModelID` de Windows y perfil dedicado de ventana para mostrar el logo oficial en la barra de tareas y barra de título de Windows 11.
+- **Escáner de Especificaciones de la PC en Vivo (`Win32` + `CIM`):**
+  - Detección automática de **CPU** (modelo y núcleos/hilos), **Memoria RAM** (total y disponible en tiempo real), **Placa de Video / GPU** (modelo dedicado o integrado + VRAM) y **Disco Libre**.
+  - Recomendador inteligente que etiqueta con `🏆 IDEAL PARA TU PC` el modelo de IA óptimo según la RAM y VRAM reales del equipo.
+- **Gestor Visual de Modelos Instalados en la PC:**
+  - Muestra claramente qué modelos de Ollama ya están instalados en el disco (`✅ YA INSTALADO`) junto con su peso en GB, permite activarlos con 1 clic o desinstalarlos (`×`) para liberar espacio.
+- **Barra Visual de Distribución de Almacenamiento:** Gráfico segmentado multicolor que desglosa cuánto espacio ocupan *Videos, Instaladores, Documentos, Imágenes y Modelos 3D* en la carpeta analizada.
+- **Compresor Cold Storage (`.ZIP`):** Nueva opción en el Limpiador para empaquetar archivos seleccionados en un backup `.zip` comprimido antes de archivarlos.
+- **Exportar / Importar Reglas (`.json`) y Buscador en Vivo:** Portabilidad de reglas entre distintas computadoras y filtro instantáneo en las pestañas de Reglas e Historial.
+- **Switch "Iniciar junto con Windows":** Opción integrada en la barra superior para registrar/quitar TidyDesk AI del arranque automático de Windows (`HKCU\...\Run`).
+
+---
+
 ## [v2.1.0] - 2026-11-16
 ### 🪟 Edición Escritorio Nativo, Selector Visual de Carpetas & Auto-Instalador Ollama
 - **Ventana de Aplicación Nativa (Sin barras de navegador):** Al abrir el `.exe` o desde el icono de la bandeja del sistema, la interfaz se lanza como una ventana independiente de escritorio (`--app`) con su propio icono `.ico` y barra de título de Windows, sin barra de direcciones ni pestañas.

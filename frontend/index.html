@@ -3,9 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TidyDesk AI - Organizador Inteligente de Escritorio y Descargas</title>
-  
-  <!-- TailwindCSS v3 CDN -->
+  <title>TidyDesk AI — Pro Studio Edition</title>
+  <meta name="theme-color" content="#07090e" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+  <!-- TailwindCSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -16,15 +22,14 @@
             brand: {
               50: '#eef2ff',
               100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
               500: '#6366f1',
               600: '#4f46e5',
               700: '#4338ca',
-            },
-            dark: {
-              bg: '#0b0f19',
-              card: '#111827',
-              border: '#1f2937',
-              hover: '#1e293b'
+              800: '#3730a3',
+              900: '#312e81',
             }
           }
         }
@@ -32,316 +37,431 @@
     }
   </script>
 
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; }
-    /* Scrollbar sutil */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #0b0f19; }
-    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #07090e;
+      background-image:
+        radial-gradient(circle at 12% 0%, rgba(79, 70, 229, 0.14) 0%, transparent 42%),
+        radial-gradient(circle at 88% 8%, rgba(14, 165, 233, 0.10) 0%, transparent 38%);
+      background-attachment: fixed;
+    }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .pro-card {
+      background: rgba(15, 20, 32, 0.82);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.075);
+      box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    .pro-subcard {
+      background: rgba(23, 31, 48, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: #07090e; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
   </style>
 </head>
-<body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+<body class="text-slate-100 min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
 
-  <!-- ========================================== -->
-  <!-- 1. HEADER / BARRA DE NAVEGACIÓN             -->
-  <!-- ========================================== -->
-  <header class="border-b border-gray-800 bg-gray-900/60 backdrop-blur-md sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+  <!-- ========================================================= -->
+  <!-- 1. TOP STUDIO HEADER & NAVIGATION                         -->
+  <!-- ========================================================= -->
+  <header class="border-b border-white/[0.07] bg-[#090d16]/85 backdrop-blur-xl sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
       
-      <!-- Brand & Logo -->
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-brand-500/20">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-          </svg>
+      <!-- Brand Identity -->
+      <div class="flex items-center gap-3.5 shrink-0">
+        <div class="relative group">
+          <div class="absolute -inset-0.5 bg-gradient-to-r from-brand-500 to-sky-400 rounded-xl blur opacity-40 group-hover:opacity-70 transition"></div>
+          <img src="/icon-192.png" alt="TidyDesk AI Logo" class="relative w-10 h-10 rounded-xl shadow-lg object-cover" />
         </div>
         <div>
-          <span class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-            TidyDesk <span class="text-brand-400 font-extrabold">AI</span>
-            <span class="text-[10px] bg-brand-500/20 text-brand-300 font-semibold px-2 py-0.5 rounded-full border border-brand-500/30">v2.1</span>
-          </span>
-          <span class="text-xs text-gray-400 hidden sm:block">Organizador Inteligente y Seguro de Archivos</span>
+          <div class="flex items-center gap-2">
+            <span class="text-base font-extrabold tracking-tight text-white">
+              TidyDesk <span class="bg-gradient-to-r from-brand-400 to-sky-400 bg-clip-text text-transparent">AI</span>
+            </span>
+            <span class="text-[10px] font-bold uppercase tracking-wider bg-brand-500/15 text-brand-300 px-2 py-0.5 rounded-md border border-brand-500/30">
+              PRO STUDIO v2.2
+            </span>
+          </div>
+          <span class="text-[11px] text-slate-400 hidden sm:block">Suite Inteligente de Organización, Limpieza y Monitoreo en Windows</span>
         </div>
       </div>
 
-      <!-- Pestañas de Vista y Estado -->
-      <div class="flex items-center gap-3 sm:gap-4">
-        
-        <!-- Pestañas de Navegación -->
-        <div class="flex bg-gray-800/80 p-1 rounded-xl border border-gray-700/60 text-xs font-medium">
-          <button id="tab-organizer-btn" class="px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all" onclick="switchTab('organizer')">
-            Organizador
-          </button>
-          <button id="tab-guardian-btn" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5" onclick="switchTab('guardian')">
-            <span id="guardian-nav-dot" class="w-2 h-2 rounded-full bg-gray-500"></span>
-            <span>🛡️ Guardián</span>
-          </button>
-          <button id="tab-cleaner-btn" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5" onclick="switchTab('cleaner')">
-            <span>🧹 Limpiador</span>
-          </button>
-          <button id="tab-rules-btn" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5" onclick="switchTab('rules')">
-            <span>⭐ Reglas</span>
-            <span id="rules-badge" class="bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded-full text-[10px]">0</span>
-          </button>
-          <button id="tab-history-btn" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5" onclick="switchTab('history')">
-            <span>Historial (Undo)</span>
-            <span id="history-badge" class="hidden bg-gray-700 text-gray-200 px-1.5 py-0.2 rounded-full text-[10px]">0</span>
-          </button>
-        </div>
+      <!-- Navigation Segmented Control -->
+      <nav class="flex items-center bg-[#111726] p-1 rounded-xl border border-white/[0.07] text-xs font-semibold overflow-x-auto">
+        <button id="tab-organizer-btn" class="px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all flex items-center gap-1.5" onclick="switchTab('organizer')">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          <span>Organizador</span>
+        </button>
+        <button id="tab-guardian-btn" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5" onclick="switchTab('guardian')">
+          <span id="guardian-nav-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+          <span>Guardián</span>
+        </button>
+        <button id="tab-cleaner-btn" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5" onclick="switchTab('cleaner')">
+          <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          <span>Limpiador</span>
+        </button>
+        <button id="tab-rules-btn" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5" onclick="switchTab('rules')">
+          <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+          <span>Reglas</span>
+          <span id="rules-badge" class="bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded-full text-[10px]">0</span>
+        </button>
+        <button id="tab-history-btn" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-1.5" onclick="switchTab('history')">
+          <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+          <span>Historial</span>
+          <span id="history-badge" class="hidden bg-slate-700 text-slate-200 px-1.5 py-0.2 rounded-full text-[10px]">0</span>
+        </button>
+      </nav>
 
-        <!-- Indicador de Ollama -->
-        <div id="ollama-status-pill" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-800/80 border border-gray-700 text-xs">
-          <span id="ollama-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
-          <span id="ollama-text" class="text-gray-300">Ollama: Comprobando...</span>
-        </div>
-
+      <!-- Live AI Status Pill -->
+      <div id="ollama-status-pill" class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#111726] border border-white/[0.08] text-xs shrink-0">
+        <span id="ollama-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+        <span id="ollama-text" class="text-slate-300 font-medium">Analizando motor IA...</span>
       </div>
 
     </div>
+
+    <!-- ========================================================= -->
+    <!-- BARRA EJECUTIVA DE TELEMETRÍA DE HARDWARE & WINDOWS       -->
+    <!-- ========================================================= -->
+    <div class="border-t border-white/[0.05] bg-[#06080d]/90">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-3 text-[11px]">
+        
+        <div class="flex flex-wrap items-center gap-4 text-slate-400">
+          <!-- CPU -->
+          <div class="flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+            <span id="hw-bar-cpu" class="text-slate-300 font-medium">Detectando CPU...</span>
+          </div>
+          <span class="text-slate-700">|</span>
+          <!-- RAM -->
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span id="hw-bar-ram" class="text-slate-300 font-medium">RAM: -- GB</span>
+          </div>
+          <span class="text-slate-700">|</span>
+          <!-- GPU -->
+          <div class="flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <span id="hw-bar-gpu" class="text-slate-300 font-medium">GPU: --</span>
+          </div>
+          <span class="text-slate-700">|</span>
+          <!-- DISCO -->
+          <div class="flex items-center gap-1.5">
+            <span id="hw-bar-disk" class="text-slate-400 font-mono">Disco libre: -- GB</span>
+          </div>
+        </div>
+
+        <!-- Switch: Iniciar con Windows -->
+        <label class="flex items-center gap-2 cursor-pointer select-none px-2.5 py-1 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] transition">
+          <input type="checkbox" id="toggle-win-startup" onchange="onWindowsStartupToggle(this.checked)" class="w-3.5 h-3.5 rounded bg-slate-800 border-slate-600 text-brand-500 focus:ring-0 cursor-pointer" />
+          <span class="text-[11px] font-medium text-slate-300">Iniciar junto con Windows (Bandeja)</span>
+        </label>
+
+      </div>
+    </div>
   </header>
 
-  <!-- ========================================== -->
-  <!-- 2. CONTENIDO PRINCIPAL                      -->
-  <!-- ========================================== -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
+  <!-- ========================================================= -->
+  <!-- 2. MAIN WORKSPACE                                         -->
+  <!-- ========================================================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 flex-1 w-full space-y-7">
     
-    <!-- PESTAÑA 1: ORGANIZADOR DE ARCHIVOS -->
-    <div id="view-organizer" class="space-y-8">
+    <!-- ======================================================= -->
+    <!-- PESTAÑA 1: ORGANIZADOR DE ARCHIVOS                      -->
+    <!-- ======================================================= -->
+    <div id="view-organizer" class="space-y-7">
       
-      <!-- Panel de Control y Configuración -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- 3-Column Control Studio Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
-        <!-- 1.1 Selector de Carpeta -->
-        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-xl space-y-4">
-          <h2 class="text-sm font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
-            <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
-            1. Seleccionar Carpeta
-          </h2>
-          <div class="grid grid-cols-2 gap-3">
-            <button type="button" id="btn-folder-desktop" class="folder-select-btn active p-4 rounded-xl border-2 border-brand-500 bg-brand-500/10 text-left transition-all" onclick="selectFolder('desktop')">
-              <span class="text-2xl block mb-1">🖥️</span>
-              <span class="font-bold text-white block text-sm">Escritorio</span>
-              <span class="text-[11px] text-gray-400 truncate block" id="path-preview-desktop">C:\Users\...\Desktop</span>
-            </button>
-            <button type="button" id="btn-folder-downloads" class="folder-select-btn p-4 rounded-xl border border-gray-800 bg-gray-800/40 text-left hover:border-gray-700 transition-all" onclick="selectFolder('downloads')">
-              <span class="text-2xl block mb-1">📥</span>
-              <span class="font-bold text-white block text-sm">Descargas</span>
-              <span class="text-[11px] text-gray-400 truncate block" id="path-preview-downloads">C:\Users\...\Downloads</span>
-            </button>
-          </div>
-
-          <!-- Botón para seleccionar cualquier otra carpeta de Windows -->
-          <button type="button" id="btn-folder-custom" class="folder-select-btn w-full p-3.5 rounded-xl border border-gray-800 bg-gray-800/40 hover:border-brand-500/50 text-left transition-all flex items-center justify-between gap-2" onclick="pickCustomFolderToOrganize()">
-            <div class="flex items-center gap-3 overflow-hidden">
-              <span class="text-xl shrink-0">📂</span>
-              <div class="overflow-hidden">
-                <span class="font-bold text-white block text-xs">Otra Carpeta de tu PC...</span>
-                <span class="text-[11px] text-gray-400 truncate block" id="path-preview-custom">Hacé clic para elegir en el Explorador de Windows</span>
-              </div>
+        <!-- COLUMNA 1: DIRECTORIO OBJETIVO (4 cols) -->
+        <div class="lg:col-span-4 pro-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
+          <div class="space-y-3.5">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <span class="w-5 h-5 rounded-md bg-brand-500/20 text-brand-400 flex items-center justify-center text-[11px] font-bold">1</span>
+                <span>Directorio a Organizar</span>
+              </h2>
+              <span class="text-[10px] text-slate-500 font-medium">Origen</span>
             </div>
-            <span class="px-2.5 py-1 rounded-lg bg-brand-500/20 text-brand-300 border border-brand-500/30 text-[10px] font-bold shrink-0">Examinar...</span>
-          </button>
 
-          <!-- Toggle para Accesos Directos (.lnk) -->
-          <div class="p-3.5 rounded-xl bg-gray-800/80 border border-gray-700 space-y-1.5">
-            <label class="flex items-center justify-between cursor-pointer">
-              <span class="text-xs font-semibold text-white flex items-center gap-2">
-                <span>🎮</span> Agrupar Accesos Directos (.lnk)
+            <!-- Tarjetas Escritorio y Descargas -->
+            <div class="grid grid-cols-2 gap-2.5">
+              <button type="button" id="btn-folder-desktop" class="folder-select-btn active p-3.5 rounded-xl border-2 border-brand-500 bg-brand-500/10 text-left transition-all" onclick="selectFolder('desktop')">
+                <div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-300 flex items-center justify-center mb-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                </div>
+                <span class="font-bold text-white block text-xs">Escritorio</span>
+                <span class="text-[10px] text-slate-400 font-mono truncate block mt-0.5" id="path-preview-desktop">Desktop</span>
+              </button>
+
+              <button type="button" id="btn-folder-downloads" class="folder-select-btn p-3.5 rounded-xl border border-white/[0.07] bg-[#141b2d]/60 text-left hover:border-white/20 transition-all" onclick="selectFolder('downloads')">
+                <div class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-300 flex items-center justify-center mb-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                </div>
+                <span class="font-bold text-white block text-xs">Descargas</span>
+                <span class="text-[10px] text-slate-400 font-mono truncate block mt-0.5" id="path-preview-downloads">Downloads</span>
+              </button>
+            </div>
+
+            <!-- Botón: Elegir Cualquier Otra Carpeta en Windows -->
+            <button type="button" id="btn-folder-custom" class="folder-select-btn w-full p-3 rounded-xl border border-white/[0.07] bg-[#141b2d]/60 hover:border-brand-500/50 text-left transition-all flex items-center justify-between gap-2" onclick="pickCustomFolderToOrganize()">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-300 flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                </div>
+                <div class="min-w-0">
+                  <span class="font-bold text-white block text-xs">Otra Carpeta de tu PC...</span>
+                  <span class="text-[10px] text-slate-400 truncate block" id="path-preview-custom">Elegir en el Explorador de Windows</span>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-lg bg-brand-500/20 text-brand-300 border border-brand-500/30 text-[10px] font-bold shrink-0">
+                Examinar...
               </span>
-              <input type="checkbox" id="toggle-include-shortcuts" class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-brand-600 focus:ring-0 cursor-pointer" onchange="onShortcutsToggleChange()" />
-            </label>
-            <p class="text-[11px] text-gray-400 leading-tight">
-              Agrupa tus apps de Juegos, Programación, Diseño y Navegadores en carpetas ordenadas en tu Escritorio.
-            </p>
+            </button>
+
+            <!-- Opciones de Escaneo -->
+            <div class="space-y-2 pt-1">
+              <label class="flex items-center justify-between p-2.5 rounded-xl pro-subcard cursor-pointer hover:border-white/15 transition">
+                <div class="pr-2">
+                  <span class="text-xs font-semibold text-white block">Agrupar Accesos Directos (.lnk)</span>
+                  <span class="text-[10px] text-slate-400 block">Ordena Juegos, Dev, Diseño y Navegadores.</span>
+                </div>
+                <input type="checkbox" id="toggle-include-shortcuts" class="w-4 h-4 rounded bg-slate-800 border-slate-600 text-brand-600 focus:ring-0 cursor-pointer shrink-0" onchange="onShortcutsToggleChange()" />
+              </label>
+
+              <label class="flex items-center justify-between p-2.5 rounded-xl pro-subcard cursor-pointer hover:border-purple-500/30 transition">
+                <div class="pr-2">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-semibold text-white">Renombrado IA Multimodal</span>
+                    <span class="text-[9px] bg-purple-500/20 text-purple-300 px-1.5 py-0.2 rounded font-bold border border-purple-500/30">Visión + PDF</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400 block">Extrae títulos de PDFs y describe capturas.</span>
+                </div>
+                <input type="checkbox" id="toggle-smart-rename" checked class="w-4 h-4 rounded bg-slate-800 border-slate-600 text-purple-600 focus:ring-0 cursor-pointer shrink-0" />
+              </label>
+            </div>
           </div>
 
-          <!-- Switch: Renombrado Multimodal Inteligente (v1.3) -->
-          <div class="p-3 rounded-xl bg-gray-800/40 border border-gray-800 space-y-2 hover:border-purple-500/30 transition-colors">
-            <label class="flex items-center justify-between cursor-pointer">
-              <span class="text-xs font-semibold text-white flex items-center gap-1.5">
-                <span>✨</span> Renombrado con IA Multimodal
-                <span class="text-[9px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded font-bold border border-purple-500/30">V1.3</span>
-              </span>
-              <input type="checkbox" id="toggle-smart-rename" checked class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-purple-600 focus:ring-0 cursor-pointer" />
-            </label>
-            <p class="text-[11px] text-gray-400 leading-tight">
-              Describe capturas/imágenes con visión y extrae títulos y fechas leyendo la primera página de tus PDFs.
-            </p>
-          </div>
-
-          <!-- Filtro de seguridad informativo -->
-          <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 flex items-center gap-2">
+          <div class="p-2.5 rounded-xl bg-emerald-500/[0.08] border border-emerald-500/20 text-[11px] text-emerald-300 flex items-center gap-2">
             <svg class="w-4 h-4 shrink-0 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-            <span id="safety-notice-text"><strong>Guardas activas:</strong> desktop.ini y archivos del sistema siempre protegidos.</span>
+            <span id="safety-notice-text"><strong>Guardas activas:</strong> Archivos de sistema siempre protegidos.</span>
           </div>
         </div>
 
-        <!-- 1.2 Selector de Motor de IA -->
-        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-xl space-y-4">
-          <h2 class="text-sm font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
-            <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            2. Motor de Clasificación
-          </h2>
-          <div class="space-y-2">
-            <select id="select-ai-provider" class="w-full px-3.5 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" onchange="onProviderChange()">
-              <option value="ollama">🦙 Ollama Local (100% Offline y Privado)</option>
-              <option value="gemini">✨ Google Gemini API (Nube de alta velocidad)</option>
-              <option value="smart_rules">⚡ Reglas Heurísticas (Instantáneo sin IA)</option>
-            </select>
-          </div>
+        <!-- COLUMNA 2: MOTOR DE IA & GESTOR DE HARDWARE / MODELOS (5 cols) -->
+        <div class="lg:col-span-5 pro-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
+          <div class="space-y-3.5">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <span class="w-5 h-5 rounded-md bg-brand-500/20 text-brand-400 flex items-center justify-center text-[11px] font-bold">2</span>
+                <span>Motor de Inteligencia Artificial</span>
+              </h2>
+              <span id="hw-tier-badge" class="text-[10px] font-bold bg-emerald-500/15 text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-500/30">
+                Analizando PC...
+              </span>
+            </div>
 
-          <!-- Configuración dinámica según proveedor -->
-          <div id="provider-config-container" class="text-xs space-y-2">
-            <!-- Selector de modelo Ollama -->
-            <div id="ollama-options" class="space-y-2.5">
-              <div>
-                <label class="text-gray-400">Modelo Ollama Activo:</label>
-                <select id="select-ollama-model" class="w-full mt-1 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-xs">
-                  <option value="llama3.2:1b">llama3.2:1b (Ultra rápido)</option>
-                  <option value="llama3">llama3</option>
+            <!-- Selector Principal de Proveedor -->
+            <div>
+              <select id="select-ai-provider" class="w-full px-3.5 py-2.5 rounded-xl bg-[#141b2d] border border-white/10 text-white text-xs font-semibold focus:outline-none focus:border-brand-500" onchange="onProviderChange()">
+                <option value="ollama">🦙 Ollama Local (100% Privado y Offline en tu PC)</option>
+                <option value="gemini">✨ Google Gemini API (Nube Multimodal de Alta Velocidad)</option>
+                <option value="smart_rules">⚡ Motor Heurístico Instantáneo (Sin consumo de RAM)</option>
+              </select>
+            </div>
+
+            <!-- Opciones de Ollama + Diagnóstico de Hardware y Modelos -->
+            <div id="ollama-options" class="space-y-3">
+              
+              <!-- Selector de Modelo Activo (Modelos ya instalados) -->
+              <div class="p-3 rounded-xl pro-subcard space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="text-[11px] font-bold text-slate-300">Modelo Local Activo (Instalados en tu PC):</label>
+                  <span id="installed-models-count-badge" class="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">
+                    0 instalados
+                  </span>
+                </div>
+                <select id="select-ollama-model" class="w-full px-3 py-2 rounded-lg bg-[#0b0f19] border border-white/10 text-white text-xs font-medium focus:outline-none focus:border-brand-500">
+                  <option value="llama3.2:1b">Cargando modelos instalados...</option>
                 </select>
+                <!-- Chips visuales de modelos instalados con botón de eliminar -->
+                <div id="installed-models-chips" class="flex flex-wrap gap-1.5 pt-0.5"></div>
               </div>
 
-              <!-- Asistente de Auto-Instalación de Ollama (V2.1) -->
-              <div id="ollama-setup-box" class="p-3 rounded-xl bg-indigo-950/30 border border-indigo-500/30 space-y-2">
-                <div class="flex items-center justify-between">
+              <!-- Asesor de Hardware + Instalador de Modelos (Sin desborde) -->
+              <div id="ollama-setup-box" class="p-3.5 rounded-xl bg-indigo-950/25 border border-indigo-500/25 space-y-2.5">
+                <div class="flex items-center justify-between gap-2">
                   <span class="text-[11px] font-bold text-indigo-300 flex items-center gap-1.5">
-                    <span>🦙</span> <span id="ollama-setup-title">Gestor de IA Local (Ollama)</span>
+                    <svg class="w-3.5 h-3.5 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    <span id="ollama-setup-title">Recomendación según el Hardware de tu PC</span>
                   </span>
-                  <span id="ollama-disk-badge" class="text-[10px] text-gray-400"></span>
                 </div>
-                <p id="ollama-setup-desc" class="text-[11px] text-gray-300 leading-tight">
-                  ¿Usás otra PC sin Ollama? Instalalo y descargá un modelo liviano con 1 solo clic.
+
+                <p id="ollama-setup-desc" class="text-[11px] text-slate-300 leading-relaxed">
+                  Escaneando procesador, memoria RAM y placa de video...
                 </p>
-                <div class="flex items-center gap-2">
-                  <select id="ollama-install-model-select" class="flex-1 px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-700 text-white text-[11px]">
-                    <option value="llama3.2:1b">llama3.2:1b (~1.3 GB — Ideal toda PC)</option>
-                    <option value="llama3.2:3b">llama3.2:3b (~2.0 GB — Balanceado)</option>
-                    <option value="llama3">llama3:8b (~4.7 GB — Potente)</option>
+
+                <!-- Controles Apilados Limpios (Nunca se salen de cuadro) -->
+                <div class="space-y-2 pt-0.5">
+                  <select id="ollama-install-model-select" class="w-full px-3 py-2 rounded-lg bg-[#0b0f19] border border-white/10 text-white text-xs focus:outline-none focus:border-indigo-500">
+                    <option value="llama3.2:1b">llama3.2:1b (~1.3 GB — Ultra Rápido, toda PC)</option>
+                    <option value="llama3.2:3b">llama3.2:3b (~2.0 GB — Recomendado 8GB-16GB RAM)</option>
+                    <option value="llama3:latest">llama3:8b (~4.7 GB — Potencia Alta 16GB+ RAM)</option>
+                    <option value="qwen2.5:7b">qwen2.5:7b (~4.7 GB — Especialista Español)</option>
                   </select>
-                  <button type="button" id="btn-ollama-autosetup" onclick="triggerOllamaAutoSetup()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold transition-all shrink-0 shadow">
-                    ⚡ Instalar / Bajar
+
+                  <button type="button" id="btn-ollama-autosetup" onclick="triggerOllamaAutoSetup()" class="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-indigo-600 to-brand-600 hover:from-indigo-500 hover:to-brand-500 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span>Descargar / Activar Modelo Seleccionado</span>
                   </button>
                 </div>
+
                 <!-- Barra de progreso en vivo -->
-                <div id="ollama-progress-wrap" class="hidden space-y-1 pt-1">
-                  <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
-                    <div id="ollama-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-300" style="width: 5%"></div>
+                <div id="ollama-progress-wrap" class="hidden space-y-1.5 pt-1">
+                  <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                    <div id="ollama-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 via-sky-400 to-emerald-400 transition-all duration-300" style="width: 5%"></div>
                   </div>
-                  <p id="ollama-progress-text" class="text-[10px] text-indigo-200 font-mono">Iniciando...</p>
+                  <p id="ollama-progress-text" class="text-[10px] text-indigo-200 font-mono truncate">Iniciando...</p>
                 </div>
               </div>
+
             </div>
-            <!-- Campo API Key Gemini -->
-            <div id="gemini-options" class="hidden space-y-1">
-              <label class="text-gray-400">Gemini API Key:</label>
-              <input type="password" id="input-gemini-key" placeholder="AIzaSy..." class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-brand-500" onchange="saveGeminiKey()" />
-              <p class="text-[10px] text-gray-500">Se guarda de forma segura en tu navegador (localStorage).</p>
+
+            <!-- Opciones de Gemini API -->
+            <div id="gemini-options" class="hidden p-3.5 rounded-xl pro-subcard space-y-2">
+              <label class="text-xs font-bold text-slate-300">Google Gemini API Key:</label>
+              <input type="password" id="input-gemini-key" placeholder="AIzaSy..." class="w-full px-3 py-2 rounded-lg bg-[#0b0f19] border border-white/10 text-white text-xs focus:outline-none focus:border-brand-500" onchange="saveGeminiKey()" />
+              <p class="text-[10px] text-slate-400">Tu clave se almacena localmente en tu equipo.</p>
             </div>
+
           </div>
         </div>
 
-        <!-- 1.3 Botón de Escaneo y Resumen -->
-        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
-          <div class="space-y-2">
-            <h2 class="text-sm font-bold uppercase tracking-wider text-gray-400">
-              3. Auditoría y Plan
-            </h2>
-            <p class="text-xs text-gray-400 leading-relaxed">
-              Escanea la carpeta aplicando tus <strong class="text-brand-300">Reglas Personalizadas</strong> y el motor de IA seleccionado.
+        <!-- COLUMNA 3: AUDITORÍA Y EJECUCIÓN (3 cols) -->
+        <div class="lg:col-span-3 pro-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <span class="w-5 h-5 rounded-md bg-brand-500/20 text-brand-400 flex items-center justify-center text-[11px] font-bold">3</span>
+                <span>Auditoría y Plan</span>
+              </h2>
+              <span class="text-[10px] text-brand-300 font-semibold">Dry-Run</span>
+            </div>
+
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Analiza la carpeta seleccionada aplicando primero tus <strong class="text-amber-300">Reglas Personalizadas</strong> y luego el motor de IA activo.
             </p>
+
+            <div class="p-3 rounded-xl pro-subcard space-y-1.5 text-[11px] text-slate-400">
+              <div class="flex items-center justify-between">
+                <span>Modo Simulación:</span>
+                <span class="text-emerald-400 font-semibold">Activo (Seguro)</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span>Reversión (Rollback):</span>
+                <span class="text-sky-400 font-semibold">Atómico 1-Clic</span>
+              </div>
+            </div>
           </div>
-          <div class="pt-4 space-y-2">
-            <button type="button" id="btn-scan" class="w-full py-3 px-4 rounded-xl font-semibold text-sm text-white bg-brand-600 hover:bg-brand-500 active:scale-[0.99] shadow-lg shadow-brand-600/30 transition-all flex items-center justify-center gap-2" onclick="startScanAndPlan()">
+
+          <div class="pt-2">
+            <button type="button" id="btn-scan" class="w-full py-3.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-white bg-gradient-to-r from-brand-600 to-indigo-500 hover:from-brand-500 hover:to-indigo-400 active:scale-[0.99] shadow-lg shadow-brand-600/30 transition-all flex items-center justify-center gap-2" onclick="startScanAndPlan()">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-              <span>Auditar con IA</span>
+              <span>Auditar Carpeta con IA</span>
             </button>
           </div>
         </div>
 
       </div>
 
-      <!-- ESTADO: LOADING (Esqueleto / Spinner) -->
-      <div id="state-loading" class="hidden py-16 text-center space-y-4">
+      <!-- ===================================================== -->
+      <!-- BARRA VISUAL DE COMPOSICIÓN DE ESPACIO (PRO STUDIO)    -->
+      <!-- ===================================================== -->
+      <div id="storage-breakdown-card" class="hidden pro-card rounded-2xl p-4 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+            <span class="font-bold text-white">Distribución de Espacio en Carpeta Analizada</span>
+          </div>
+          <span id="storage-total-label" class="font-mono text-xs text-brand-300 font-semibold">0 MB en total</span>
+        </div>
+        <!-- Segmented Bar -->
+        <div id="storage-bar-segments" class="w-full h-3 bg-slate-900 rounded-full overflow-hidden flex gap-0.5 p-0.5 border border-white/5"></div>
+        <!-- Legend -->
+        <div id="storage-bar-legend" class="flex flex-wrap items-center gap-4 text-[11px] text-slate-300"></div>
+      </div>
+
+      <!-- ESTADO: LOADING -->
+      <div id="state-loading" class="hidden pro-card rounded-2xl py-16 text-center space-y-4">
         <div class="w-12 h-12 mx-auto border-4 border-brand-500/20 border-t-brand-500 rounded-full animate-spin"></div>
         <div>
           <h3 class="text-base font-bold text-white" id="loading-title">Escaneando archivos...</h3>
-          <p class="text-xs text-gray-400" id="loading-subtitle">Analizando contenido y consultando el plan a la IA.</p>
+          <p class="text-xs text-slate-400 mt-1" id="loading-subtitle">Analizando contenido y consultando el plan a la IA.</p>
         </div>
       </div>
 
-      <!-- ESTADO: EMPTY (Carpeta ya organizada) -->
-      <div id="state-empty" class="hidden py-16 text-center space-y-3 bg-gray-900/50 rounded-2xl border border-gray-800">
-        <div class="w-16 h-16 mx-auto rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-3xl">
-          ✨
+      <!-- ESTADO: EMPTY -->
+      <div id="state-empty" class="hidden pro-card rounded-2xl py-14 text-center space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/20">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
         </div>
-        <h3 class="text-lg font-bold text-white">¡Carpeta Impecable!</h3>
-        <p class="text-xs text-gray-400 max-w-md mx-auto">
-          No se encontraron archivos sueltos para organizar en esta carpeta. Todos los elementos ya están clasificados o protegidos.
+        <h3 class="text-base font-bold text-white">¡Directorio Impecable!</h3>
+        <p class="text-xs text-slate-400 max-w-md mx-auto">
+          No se encontraron archivos sueltos pendientes de organizar en esta carpeta. Todos los elementos ya están clasificados en subcarpetas o protegidos.
         </p>
       </div>
 
       <!-- ESTADO: ERROR -->
-      <div id="state-error" class="hidden py-12 px-6 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-center space-y-3">
-        <div class="w-12 h-12 mx-auto rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-        </div>
-        <h3 class="text-base font-bold text-rose-300" id="error-title">Ocurrió un inconveniente</h3>
-        <p class="text-xs text-rose-200/80 max-w-lg mx-auto" id="error-message">Detalles del error.</p>
-        <button type="button" class="px-4 py-2 rounded-xl bg-gray-800 text-white text-xs font-semibold hover:bg-gray-700" onclick="startScanAndPlan()">
-          Reintentar
-        </button>
+      <div id="state-error" class="hidden bg-rose-950/30 border border-rose-500/30 rounded-2xl p-6 text-center space-y-3">
+        <h3 class="text-base font-bold text-rose-200" id="error-title">Ocurrió un inconveniente</h3>
+        <p class="text-xs text-rose-300/80 max-w-lg mx-auto" id="error-message">Detalle del error.</p>
       </div>
 
-      <!-- ESTADO: SUCCESS / DRY-RUN (Tabla de Vista Previa) -->
+      <!-- ESTADO: SUCCESS / DRY-RUN PLAN TABLE -->
       <div id="state-plan" class="hidden space-y-4">
         
-        <!-- Header de la propuesta -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gray-900/90 p-4 sm:p-5 rounded-2xl border border-gray-800 shadow-lg">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pro-card p-4 rounded-2xl">
           <div>
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-brand-400 animate-pulse"></span>
-              <h2 class="text-base font-bold text-white">Plan de Organización (Dry-Run)</h2>
+              <h2 class="text-sm font-bold text-white">Propuesta de Organización (Modo Simulación Dry-Run)</h2>
             </div>
-            <p class="text-xs text-gray-400 mt-0.5">
-              Revisá la propuesta. Podés editar las carpetas de destino o desmarcar lo que no quieras mover.
+            <p class="text-xs text-slate-400 mt-0.5">
+              Podés personalizar las carpetas destino o el nuevo nombre de cualquier archivo antes de ejecutar.
             </p>
           </div>
           
-          <!-- Botón de Ejecutar -->
           <div class="flex items-center gap-3 w-full sm:w-auto">
-            <span class="text-xs text-gray-400 hidden sm:inline" id="plan-selection-count">0 seleccionados</span>
-            <button type="button" id="btn-execute" class="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2" onclick="executeCurrentPlan()">
+            <span class="text-xs text-slate-400 hidden sm:inline font-mono" id="plan-selection-count">0 seleccionados</span>
+            <button type="button" id="btn-execute" class="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-white bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2" onclick="executeCurrentPlan()">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               <span>Confirmar y Organizar</span>
             </button>
           </div>
         </div>
 
-        <!-- Tabla interactiva -->
-        <div class="overflow-x-auto rounded-2xl border border-gray-800 bg-gray-900/60 shadow-xl">
+        <div class="overflow-x-auto rounded-2xl pro-card">
           <table class="w-full text-left border-collapse text-xs">
             <thead>
-              <tr class="border-b border-gray-800 bg-gray-800/60 text-gray-400 font-semibold uppercase tracking-wider">
-                <th class="py-3 px-4 w-12 text-center">
-                  <input type="checkbox" id="check-all" checked onchange="toggleSelectAll(this.checked)" class="rounded bg-gray-700 border-gray-600 text-brand-600 focus:ring-0 cursor-pointer" />
+              <tr class="border-b border-white/[0.07] bg-[#0a0e17] text-slate-400 uppercase text-[10px] tracking-wider">
+                <th class="py-3.5 px-4 w-12 text-center">
+                  <input type="checkbox" id="check-all" checked onchange="toggleSelectAll(this.checked)" class="rounded bg-slate-800 border-slate-600 text-brand-600 focus:ring-0 cursor-pointer" />
                 </th>
-                <th class="py-3 px-4">Archivo Original</th>
-                <th class="py-3 px-4">Carpeta Destino</th>
-                <th class="py-3 px-4">Nuevo Nombre (Editable)</th>
-                <th class="py-3 px-4">Motivo / Clasificación</th>
-                <th class="py-3 px-4 text-right">Tamaño</th>
+                <th class="py-3.5 px-4">Archivo Original</th>
+                <th class="py-3.5 px-4">Carpeta Destino</th>
+                <th class="py-3.5 px-4">Nuevo Nombre (Editable)</th>
+                <th class="py-3.5 px-4">Clasificación / Motivo IA</th>
+                <th class="py-3.5 px-4 text-right">Tamaño</th>
               </tr>
             </thead>
-            <tbody id="plan-table-body" class="divide-y divide-gray-800 text-gray-300">
-              <!-- Filas dinámicas generadas con app.js -->
-            </tbody>
+            <tbody id="plan-table-body" class="divide-y divide-white/[0.05] text-slate-300"></tbody>
           </table>
         </div>
 
@@ -349,139 +469,142 @@
 
     </div>
 
-    <!-- PESTAÑA 2: LIMPIADOR INTELIGENTE (V1.2) -->
+    <!-- ======================================================= -->
+    <!-- PESTAÑA 2: LIMPIADOR INTELIGENTE & COLD STORAGE (.ZIP)  -->
+    <!-- ======================================================= -->
     <div id="view-cleaner" class="hidden space-y-6">
       
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pro-card p-5 rounded-2xl">
         <div>
-          <h2 class="text-lg font-bold text-white flex items-center gap-2">
-            <span>🧹 Limpiador Inteligente & Duplicados</span>
-            <span class="text-[10px] font-bold bg-brand-500/20 text-brand-300 px-2.5 py-0.5 rounded-full border border-brand-500/30">V1.2</span>
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <span>🧹 Limpiador Criptográfico SHA-256 & Compresor ZIP</span>
+            <span class="text-[10px] font-bold bg-sky-500/20 text-sky-300 px-2.5 py-0.5 rounded-full border border-sky-500/30">PRO</span>
           </h2>
-          <p class="text-xs text-gray-400 mt-0.5 max-w-2xl">
-            Detecta archivos duplicados idénticos bit a bit mediante hash criptográfico SHA-256 e instaladores antiguos que consumen espacio.
+          <p class="text-xs text-slate-400 mt-0.5 max-w-2xl">
+            Detecta archivos idénticos bit a bit (SHA-256) e instaladores antiguos. Podés moverlos a cuarentena con Rollback o comprimirlos en un archivo <code class="text-sky-300">.zip</code> para ahorrar espacio.
           </p>
         </div>
-        <button type="button" id="btn-audit-cleaner" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-brand-600/30" onclick="startCleanerAudit()">
+        <button type="button" id="btn-audit-cleaner" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-brand-600/30 shrink-0" onclick="startCleanerAudit()">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-          <span>Auditar Duplicados e Instaladores</span>
+          <span>Analizar Duplicados e Instaladores</span>
         </button>
       </div>
 
       <!-- Métricas Resumen -->
       <div id="cleaner-metrics" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-4 shadow-lg">
-          <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Espacio Recuperable</p>
+        <div class="pro-card rounded-2xl p-4">
+          <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Espacio Recuperable</p>
           <p class="text-2xl font-black text-emerald-400 mt-1" id="metric-recoverable-space">0 MB</p>
-          <p class="text-[10px] text-gray-500 mt-0.5">Sumando duplicados e instaladores</p>
+          <p class="text-[10px] text-slate-500 mt-0.5">Sumando duplicados e instaladores</p>
         </div>
-        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-4 shadow-lg">
-          <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Copias Duplicadas</p>
+        <div class="pro-card rounded-2xl p-4">
+          <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Copias Duplicadas (SHA-256)</p>
           <p class="text-2xl font-black text-amber-400 mt-1" id="metric-duplicates-count">0</p>
-          <p class="text-[10px] text-gray-500 mt-0.5" id="metric-duplicates-waste">Desperdicio: 0 MB</p>
+          <p class="text-[10px] text-slate-500 mt-0.5" id="metric-duplicates-waste">Desperdicio: 0 MB</p>
         </div>
-        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-4 shadow-lg">
-          <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Instaladores Antiguos (>30d)</p>
+        <div class="pro-card rounded-2xl p-4">
+          <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Instaladores Antiguos (>30d)</p>
           <p class="text-2xl font-black text-indigo-400 mt-1" id="metric-installers-count">0</p>
-          <p class="text-[10px] text-gray-500 mt-0.5" id="metric-installers-waste">Ocupación: 0 MB</p>
+          <p class="text-[10px] text-slate-500 mt-0.5" id="metric-installers-waste">Ocupación: 0 MB</p>
         </div>
       </div>
 
-      <!-- Barra de Acción de Limpieza -->
-      <div id="cleaner-action-bar" class="hidden flex items-center justify-between bg-gray-900/90 p-4 rounded-2xl border border-gray-800 shadow-xl">
-        <div class="text-xs text-gray-300">
-          <span id="cleaner-selected-count" class="font-bold text-white">0</span> elementos marcados para limpiar
+      <!-- Barra de Acción de Limpieza + Cold Storage ZIP -->
+      <div id="cleaner-action-bar" class="hidden flex flex-wrap items-center justify-between gap-3 pro-card p-4 rounded-2xl">
+        <div class="text-xs text-slate-300">
+          <span id="cleaner-selected-count" class="font-bold text-white">0</span> elementos marcados para procesar
         </div>
-        <button type="button" id="btn-execute-clean" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white text-xs font-bold transition-all shadow-lg shadow-rose-600/20 flex items-center gap-2" onclick="executeCleanerAction()">
-          <span>🧹 Limpiar y Archivar con Rollback</span>
-        </button>
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button type="button" onclick="compressSelectedToZip()" class="px-4 py-2.5 rounded-xl bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 text-xs font-bold transition-all flex items-center gap-2">
+            <span>📦 Comprimir en .ZIP (Cold Storage)</span>
+          </button>
+          <button type="button" id="btn-execute-clean" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white text-xs font-bold transition-all shadow-lg shadow-rose-600/20 flex items-center gap-2" onclick="executeCleanerAction()">
+            <span>🧹 Limpiar con Rollback</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Secciones de Resultados -->
+      <!-- Resultados -->
       <div id="cleaner-results" class="hidden space-y-6">
-        
-        <!-- Duplicados -->
         <div id="cleaner-duplicates-section" class="space-y-3">
-          <h3 class="text-sm font-bold text-white flex items-center gap-2">
-            <span>👥 Archivos Duplicados Idénticos (Hash SHA-256)</span>
-          </h3>
+          <h3 class="text-sm font-bold text-white">👥 Archivos Duplicados Idénticos (Hash SHA-256)</h3>
           <div id="cleaner-duplicates-list" class="space-y-3"></div>
         </div>
-
-        <!-- Instaladores Viejos -->
         <div id="cleaner-installers-section" class="space-y-3">
-          <h3 class="text-sm font-bold text-white flex items-center gap-2">
-            <span>📦 Instaladores Antiguos (>30 días)</span>
-          </h3>
+          <h3 class="text-sm font-bold text-white">📦 Instaladores Antiguos (>30 días)</h3>
           <div id="cleaner-installers-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
         </div>
-
       </div>
 
-      <div id="cleaner-empty" class="py-16 text-center text-gray-500 space-y-2">
-        <span class="text-3xl block">🔍</span>
-        <p class="text-sm">Hacé clic en "Auditar Duplicados e Instaladores" para analizar tu carpeta.</p>
+      <div id="cleaner-empty" class="pro-card rounded-2xl py-16 text-center text-slate-500 space-y-2">
+        <p class="text-sm font-semibold text-slate-300">Auditoría de Almacenamiento Lista</p>
+        <p class="text-xs">Hacé clic en "Analizar Duplicados e Instaladores" para escanear la carpeta seleccionada.</p>
       </div>
 
     </div>
 
-    <!-- PESTAÑA 3: REGLAS PERSONALIZADAS (V1.1) -->
+    <!-- ======================================================= -->
+    <!-- PESTAÑA 3: REGLAS PERSONALIZADAS + EXPORTAR / IMPORTAR  -->
+    <!-- ======================================================= -->
     <div id="view-rules" class="hidden space-y-6">
       
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pro-card p-5 rounded-2xl">
         <div>
-          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
             <span>⭐ Reglas de Destino Personalizadas</span>
-            <span class="text-[10px] font-bold bg-brand-500/20 text-brand-300 px-2.5 py-0.5 rounded-full border border-brand-500/30">V1.1</span>
+            <span class="text-[10px] font-bold bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-500/30">Prioridad #1</span>
           </h2>
-          <p class="text-xs text-gray-400 mt-0.5 max-w-2xl">
-            Definí reglas fijas para enviar archivos a carpetas específicas de tu sistema o discos externos. Tus reglas tienen prioridad absoluta sobre la IA.
+          <p class="text-xs text-slate-400 mt-0.5 max-w-xl">
+            Definí reglas fijas hacia cualquier carpeta o disco externo. Podés exportarlas a un archivo <code class="text-amber-300">.json</code> para llevarlas a otra PC.
           </p>
         </div>
-        <button type="button" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-brand-600/30" onclick="toggleNewRuleModal(true)">
-          <span>+ Nueva Regla</span>
-        </button>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" onclick="exportCustomRules()" class="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-slate-200 text-xs font-semibold transition flex items-center gap-1.5">
+            <span>📤 Exportar (.json)</span>
+          </button>
+          <label class="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-slate-200 text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer">
+            <span>📥 Importar (.json)</span>
+            <input type="file" accept=".json" class="hidden" onchange="importCustomRulesFile(this)" />
+          </label>
+          <button type="button" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition shadow-lg shadow-brand-600/30" onclick="toggleNewRuleModal(true)">
+            <span>+ Nueva Regla</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Formulario / Modal para crear regla -->
-      <div id="new-rule-card" class="hidden bg-gray-900 border border-brand-500/40 rounded-2xl p-5 shadow-2xl space-y-4">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <span>➕ Crear Nueva Regla de Destino</span>
-        </h3>
+      <!-- Modal Crear Regla -->
+      <div id="new-rule-card" class="hidden pro-card border-brand-500/40 rounded-2xl p-5 space-y-4">
+        <h3 class="text-sm font-bold text-white">➕ Crear Nueva Regla de Destino</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
           <div class="space-y-1">
-            <label class="text-gray-400 font-semibold">Nombre de la Regla:</label>
-            <input type="text" id="rule-input-name" placeholder="Ej: Mis Diseños o Facultad" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
+            <label class="text-slate-400 font-semibold">Nombre de la Regla:</label>
+            <input type="text" id="rule-input-name" placeholder="Ej: Impresión 3D o Facultad" class="w-full px-3 py-2 rounded-lg bg-[#0b0f19] border border-white/10 text-white focus:outline-none focus:border-brand-500" />
           </div>
           <div class="space-y-1">
-            <label class="text-gray-400 font-semibold">Tipo de Filtro:</label>
-            <select id="rule-input-type" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500">
+            <label class="text-slate-400 font-semibold">Tipo de Filtro:</label>
+            <select id="rule-input-type" class="w-full px-3 py-2 rounded-lg bg-[#0b0f19] border border-white/10 text-white focus:outline-none focus:border-brand-500">
               <option value="extension">Por Extensión (ej: .stl, .pdf, .zip)</option>
-              <option value="keyword">Por Palabra Clave (ej: parcial, factura, proyecto)</option>
+              <option value="keyword">Por Palabra Clave (ej: parcial, factura, tp)</option>
             </select>
           </div>
           <div class="space-y-1">
-            <label class="text-gray-400 font-semibold">Patrones (separados por coma):</label>
-            <input type="text" id="rule-input-patterns" placeholder="ej: .stl, .step o parcial, tp" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
+            <label class="text-slate-400 font-semibold">Patrones (separados por coma):</label>
+            <input type="text" id="rule-input-patterns" placeholder="ej: .stl, .step, .3mf" class="w-full px-3 py-2 rounded-lg bg-[#0b0f19] border border-white/10 text-white focus:outline-none focus:border-brand-500" />
           </div>
           <div class="space-y-1">
-            <label class="text-gray-400 font-semibold">Carpeta de Destino:</label>
+            <label class="text-slate-400 font-semibold">Carpeta de Destino:</label>
             <div class="flex items-center gap-1.5">
-              <input type="text" id="rule-input-dest" placeholder="Elegí con Examinar o escribí ruta" class="flex-1 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
-              <button type="button" onclick="browseRuleDestFolder()" class="px-3 py-2 rounded-lg bg-brand-600/30 hover:bg-brand-600/50 text-brand-200 border border-brand-500/40 font-bold text-xs shrink-0 transition-all" title="Seleccionar carpeta en el Explorador de Windows">
+              <input type="text" id="rule-input-dest" placeholder="Seleccioná con Examinar..." class="flex-1 min-w-0 px-3 py-2 rounded-lg bg-[#0b0f19] border border-white/10 text-white focus:outline-none focus:border-brand-500" />
+              <button type="button" onclick="browseRuleDestFolder()" class="px-3 py-2 rounded-lg bg-brand-600/30 hover:bg-brand-600/50 text-brand-200 border border-brand-500/40 font-bold text-xs shrink-0 transition">
                 📂 Examinar...
               </button>
             </div>
           </div>
         </div>
-        
-        <div class="flex items-center gap-2 pt-1 text-[11px] text-gray-400">
-          <span>Tip de ruta:</span>
-          <span class="text-gray-500">Podés indicar cualquier ruta absoluta de tu disco (ej: <code class="text-brand-300">D:\MiCarpeta</code>) o una subcarpeta relativa.</span>
-        </div>
 
-        <div class="flex justify-end gap-2 pt-2 border-t border-gray-800">
-          <button type="button" class="px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold" onclick="toggleNewRuleModal(false)">
+        <div class="flex justify-end gap-2 pt-2 border-t border-white/[0.07]">
+          <button type="button" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold" onclick="toggleNewRuleModal(false)">
             Cancelar
           </button>
           <button type="button" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold" onclick="saveNewRule()">
@@ -490,32 +613,34 @@
         </div>
       </div>
 
-      <!-- Grilla de Tarjetas de Reglas -->
-      <div id="rules-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Tarjetas dinámicas generadas en app.js -->
+      <!-- Buscador de Reglas -->
+      <div class="flex items-center gap-2">
+        <input type="text" id="rules-search-input" oninput="renderRulesList()" placeholder="🔍 Buscar regla por nombre, extensión o carpeta..." class="w-full sm:w-96 px-3.5 py-2 rounded-xl bg-[#0f1420] border border-white/[0.08] text-xs text-white focus:outline-none focus:border-brand-500" />
       </div>
 
-      <div id="rules-empty" class="hidden py-16 text-center text-gray-500 space-y-2">
-        <span class="text-3xl block">⚙️</span>
-        <p class="text-sm">No tenés reglas activas en este momento.</p>
+      <div id="rules-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+      <div id="rules-empty" class="hidden pro-card rounded-2xl py-16 text-center text-slate-500 space-y-2">
+        <p class="text-sm font-semibold text-slate-300">No tenés reglas configuradas</p>
+        <p class="text-xs">Creá tu primera regla con "+ Nueva Regla" o importá un archivo .json.</p>
       </div>
 
     </div>
 
-    <!-- PESTAÑA 4: MODO GUARDIÁN EN SEGUNDO PLANO (V1.4) -->
+    <!-- ======================================================= -->
+    <!-- PESTAÑA 4: MODO GUARDIÁN EN SEGUNDO PLANO (V1.4 / V2.2) -->
+    <!-- ======================================================= -->
     <div id="view-guardian" class="hidden space-y-6">
       
-      <!-- Banner de Estado del Guardián -->
-      <div id="guardian-hero-card" class="bg-gray-900/90 border border-gray-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all">
+      <div id="guardian-hero-card" class="pro-card rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all">
         <div class="space-y-1.5">
           <div class="flex items-center gap-2.5">
-            <span id="guardian-status-dot" class="w-3 h-3 rounded-full bg-gray-500"></span>
-            <h2 class="text-lg font-bold text-white flex items-center gap-2">
-              <span>🛡️ Modo Guardián en Tiempo Real (Watchdog)</span>
-              <span class="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30">V1.4</span>
+            <span id="guardian-status-dot" class="w-3 h-3 rounded-full bg-slate-500"></span>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span>🛡️ Modo Guardián en Tiempo Real (Watchdog Daemon)</span>
             </h2>
           </div>
-          <p id="guardian-status-text" class="text-xs text-gray-400 max-w-2xl">
+          <p id="guardian-status-text" class="text-xs text-slate-400 max-w-2xl">
             El Guardián está inactivo. Al activarlo, vigilará tu carpeta en segundo plano y organizará automáticamente cada archivo apenas termine de descargarse.
           </p>
         </div>
@@ -526,121 +651,109 @@
         </button>
       </div>
 
-      <!-- Configuración del Guardián -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        
-        <!-- 1. Carpeta Vigilada -->
-        <div class="bg-gray-900/70 border border-gray-800/80 rounded-2xl p-5 space-y-3">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">1. Carpeta a Vigilar</h3>
+        <div class="pro-card rounded-2xl p-5 space-y-3">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">1. Carpeta a Vigilar</h3>
           <div class="flex items-center gap-2">
-            <select id="guardian-folder-type" onchange="onGuardianFolderSelectChange()" class="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+            <select id="guardian-folder-type" onchange="onGuardianFolderSelectChange()" class="flex-1 min-w-0 bg-[#141b2d] border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500">
               <option value="downloads">📥 Carpeta Descargas (Recomendado)</option>
               <option value="desktop">🖥️ Carpeta Escritorio</option>
               <option value="custom">📂 Otra Carpeta Personalizada...</option>
             </select>
-            <button type="button" onclick="pickGuardianCustomFolder()" class="px-3 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-xs text-brand-300 font-bold shrink-0" title="Elegir carpeta en Windows">
+            <button type="button" onclick="pickGuardianCustomFolder()" class="px-3 py-2.5 rounded-xl bg-brand-600/20 hover:bg-brand-600/30 border border-brand-500/30 text-xs text-brand-300 font-bold shrink-0">
               📂 Elegir...
             </button>
           </div>
           <p id="guardian-custom-path-label" class="hidden text-[11px] text-brand-300 font-mono truncate"></p>
-          <p class="text-[11px] text-gray-400 leading-relaxed">
-            Espera automáticamente a que los navegadores terminen de descargar (<code class="text-gray-300">.crdownload</code> / <code class="text-gray-300">.part</code>) antes de mover el archivo.
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Aguarda automáticamente a que finalicen las descargas temporales (<code class="text-slate-300">.crdownload</code> / <code class="text-slate-300">.part</code>).
           </p>
         </div>
 
-        <!-- 2. Nivel de Automatización -->
-        <div class="bg-gray-900/70 border border-gray-800/80 rounded-2xl p-5 space-y-3">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">2. Nivel de Automatización</h3>
-          <select id="guardian-mode" onchange="onGuardianConfigChange()" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+        <div class="pro-card rounded-2xl p-5 space-y-3">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">2. Nivel de Automatización</h3>
+          <select id="guardian-mode" onchange="onGuardianConfigChange()" class="w-full bg-[#141b2d] border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500">
             <option value="all">⚡ Clasificación Completa (Reglas + Heurística)</option>
             <option value="custom_only">⭐ Solo mis Reglas Personalizadas</option>
           </select>
-          <p class="text-[11px] text-gray-400 leading-relaxed">
-            Podés elegir organizar todos los archivos nuevos o únicamente aquellos que coincidan con tus Reglas Personalizadas.
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Podés elegir organizar todos los archivos nuevos o únicamente los que coincidan con tus Reglas Personalizadas.
           </p>
         </div>
 
-        <!-- 3. Opciones Inteligentes -->
-        <div class="bg-gray-900/70 border border-gray-800/80 rounded-2xl p-5 space-y-3">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">3. Opciones Inteligentes</h3>
-          
-          <label class="flex items-center justify-between p-2.5 rounded-xl bg-gray-800/40 border border-gray-800 cursor-pointer">
-            <span class="text-xs text-gray-200 font-medium">✨ Renombrado Multimodal (PDF/Img)</span>
-            <input type="checkbox" id="guardian-smart-rename" checked onchange="onGuardianConfigChange()" class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-brand-600 focus:ring-0 cursor-pointer" />
+        <div class="pro-card rounded-2xl p-5 space-y-3">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">3. Opciones Inteligentes</h3>
+          <label class="flex items-center justify-between p-2.5 rounded-xl pro-subcard cursor-pointer">
+            <span class="text-xs text-slate-200 font-medium">✨ Renombrado Multimodal (PDF/Img)</span>
+            <input type="checkbox" id="guardian-smart-rename" checked onchange="onGuardianConfigChange()" class="w-4 h-4 rounded bg-slate-800 border-slate-600 text-brand-600 focus:ring-0 cursor-pointer" />
           </label>
-
-          <label class="flex items-center justify-between p-2.5 rounded-xl bg-gray-800/40 border border-gray-800 cursor-pointer">
-            <span class="text-xs text-gray-200 font-medium">🔔 Notificación Nativa en Windows</span>
-            <input type="checkbox" id="guardian-win-notify" checked onchange="onGuardianConfigChange()" class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-brand-600 focus:ring-0 cursor-pointer" />
+          <label class="flex items-center justify-between p-2.5 rounded-xl pro-subcard cursor-pointer">
+            <span class="text-xs text-slate-200 font-medium">🔔 Notificación Nativa en Windows</span>
+            <input type="checkbox" id="guardian-win-notify" checked onchange="onGuardianConfigChange()" class="w-4 h-4 rounded bg-slate-800 border-slate-600 text-brand-600 focus:ring-0 cursor-pointer" />
           </label>
         </div>
-
       </div>
 
-      <!-- Bitácora en Tiempo Real -->
-      <div class="bg-gray-900/80 border border-gray-800 rounded-2xl p-6 space-y-4">
+      <div class="pro-card rounded-2xl p-6 space-y-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <h3 class="text-sm font-bold text-white">📡 Actividad en Tiempo Real</h3>
-            <span id="guardian-session-counter" class="text-[11px] bg-gray-800 text-gray-300 px-2.5 py-0.5 rounded-full border border-gray-700">0 organizados en esta sesión</span>
+            <span id="guardian-session-counter" class="text-[11px] bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-full border border-white/10">0 organizados en esta sesión</span>
           </div>
-          <button type="button" onclick="clearGuardianEvents()" class="text-xs text-gray-400 hover:text-white underline">
+          <button type="button" onclick="clearGuardianEvents()" class="text-xs text-slate-400 hover:text-white underline">
             Limpiar registro
           </button>
         </div>
-
-        <div id="guardian-events-list" class="space-y-3">
-          <!-- Eventos en vivo renderizados por app.js -->
-        </div>
-
-        <div id="guardian-events-empty" class="py-12 text-center text-gray-500 space-y-2">
-          <span class="text-3xl block">🛰️</span>
+        <div id="guardian-events-list" class="space-y-3"></div>
+        <div id="guardian-events-empty" class="py-12 text-center text-slate-500 space-y-2">
           <p class="text-xs">Todavía no se registraron movimientos automáticos en esta sesión.</p>
         </div>
       </div>
 
     </div>
 
-    <!-- PESTAÑA 5: HISTORIAL Y ROLLBACK -->
+    <!-- ======================================================= -->
+    <!-- PESTAÑA 5: HISTORIAL DE TRANSACCIONES & BUSCADOR        -->
+    <!-- ======================================================= -->
     <div id="view-history" class="hidden space-y-6">
       
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pro-card p-5 rounded-2xl">
         <div>
-          <h2 class="text-lg font-bold text-white">Historial de Organizaciones</h2>
-          <p class="text-xs text-gray-400">Cada lote queda registrado. Podés revertir cualquier cambio al estado anterior con un solo clic.</p>
+          <h2 class="text-base font-bold text-white">Historial Atómico de Organizaciones (Rollback 1-Clic)</h2>
+          <p class="text-xs text-slate-400">Cada operación queda registrada. Podés restaurar cualquier lote a su ubicación y nombre original.</p>
         </div>
-        <button type="button" class="text-xs text-brand-400 hover:text-brand-300 underline" onclick="loadHistory()">
-          Actualizar historial
-        </button>
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+          <input type="text" id="history-search-input" oninput="filterHistoryList()" placeholder="🔍 Buscar archivo en historial..." class="flex-1 sm:w-64 px-3 py-2 rounded-xl bg-[#0b0f19] border border-white/10 text-xs text-white focus:outline-none focus:border-brand-500" />
+          <button type="button" class="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-xs text-brand-300 font-semibold shrink-0" onclick="loadHistory()">
+            Actualizar
+          </button>
+        </div>
       </div>
 
-      <div id="history-list" class="space-y-4">
-        <!-- Tarjetas dinámicas de transacciones -->
-      </div>
+      <div id="history-list" class="space-y-4"></div>
 
-      <div id="history-empty" class="hidden py-16 text-center text-gray-500 space-y-2">
-        <span class="text-3xl block">📋</span>
-        <p class="text-sm">Aún no se ha realizado ninguna organización de archivos.</p>
+      <div id="history-empty" class="hidden pro-card rounded-2xl py-16 text-center text-slate-500 space-y-2">
+        <p class="text-sm font-semibold text-slate-300">Historial Vacío</p>
+        <p class="text-xs">Aún no se ha realizado ninguna organización de archivos.</p>
       </div>
 
     </div>
 
   </main>
 
-  <!-- ========================================== -->
-  <!-- 3. TOAST NOTIFICACIONES                     -->
-  <!-- ========================================== -->
-  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 max-w-md bg-gray-900 border border-gray-700 shadow-2xl rounded-2xl p-4 flex items-center gap-3">
+  <!-- ========================================================= -->
+  <!-- 3. TOAST NOTIFICATIONS                                    -->
+  <!-- ========================================================= -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 max-w-md pro-card rounded-2xl p-4 flex items-center gap-3">
     <div id="toast-icon" class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
       ✓
     </div>
-    <div class="flex-1">
+    <div class="flex-1 min-w-0">
       <h4 id="toast-title" class="text-xs font-bold text-white">Operación exitosa</h4>
-      <p id="toast-message" class="text-[11px] text-gray-300">Detalles de la acción realizada.</p>
+      <p id="toast-message" class="text-[11px] text-slate-300 truncate">Detalles de la acción realizada.</p>
     </div>
   </div>
 
-  <!-- Script principal de la aplicación -->
   <script src="/app.js"></script>
 </body>
 </html>

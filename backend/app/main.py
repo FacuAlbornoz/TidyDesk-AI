@@ -28,7 +28,7 @@ from app.schemas.guardian import GuardianConfig, GuardianStatusResponse
 from app.core.scanner import scan_directory, resolve_target_folder
 from app.core.organizer import execute_plan, rollback_transaction
 from app.core.history import load_history
-from app.core.rules_manager import load_rules, create_rule, delete_rule, toggle_rule
+from app.core.rules_manager import load_rules, create_rule, delete_rule, toggle_rule, import_rules_batch
 from app.core.cleaner import audit_clean_directory, execute_clean_action
 from app.core.multimodal import apply_multimodal_renaming
 from app.core.guardian import guardian_manager
@@ -36,6 +36,11 @@ from app.core.system_utils import (
     pick_folder_dialog,
     ollama_setup_manager,
     ensure_ollama_running_if_installed,
+    create_pro_brand_icon,
+    get_pc_hardware_specs,
+    get_windows_startup_status,
+    set_windows_startup,
+    archive_old_files_to_zip,
 )
 from app.ai.ollama_provider import OllamaProvider
 from app.ai.gemini_provider import GeminiProvider
@@ -250,11 +255,21 @@ async def clear_guardian_events():
     return guardian_manager.clear_events()
 
 # ==========================================
-# ENDPOINTS: INTEGRACIÓN NATIVA WINDOWS & AUTO-SETUP OLLAMA (V2.1)
+# ENDPOINTS: INTEGRACIÓN NATIVA WINDOWS, HARDWARE & PRO STUDIO (V2.2)
 # ==========================================
 
 class OllamaAutoSetupRequest(BaseModel):
     model: str = "llama3.2:1b"
+
+class StartupToggleRequest(BaseModel):
+    enabled: bool
+
+class ImportRulesRequest(BaseModel):
+    rules: list[dict]
+
+class CompressZipRequest(BaseModel):
+    target_folder: str
+    file_ids_to_clean: list[str]
 
 @app.get("/api/system/pick-folder")
 async def pick_native_windows_folder(title: str = "Seleccionar carpeta — TidyDesk AI"):
@@ -265,26 +280,104 @@ async def pick_native_windows_folder(title: str = "Seleccionar carpeta — TidyD
     p = Path(chosen)
     return {"selected": True, "path": str(p), "name": p.name or str(p)}
 
+@app.get("/api/system/hardware")
+async def get_system_hardware():
+    """Devuelve las especificaciones de hardware de la PC y la recomendación de IA."""
+    return get_pc_hardware_specs()
+
+@app.get("/api/system/startup")
+async def get_startup_config():
+    """Devuelve si TidyDesk AI está configurado para iniciar con Windows."""
+    return {"enabled": get_windows_startup_status()}
+
+@app.post("/api/system/startup")
+async def toggle_startup_config(req: StartupToggleRequest):
+    """Activa o desactiva el inicio automático de TidyDesk AI junto con Windows."""
+    new_state = set_windows_startup(req.enabled)
+    return {"enabled": new_state}
+
 @app.get("/api/ollama/setup-status")
 async def get_ollama_setup_status():
-    """Consulta si Ollama está instalado en el sistema, el espacio en disco y el progreso de descarga."""
+    """Consulta estado de Ollama, hardware de la PC, modelos instalados y catálogo."""
     return ollama_setup_manager.get_status()
 
 @app.post("/api/ollama/auto-setup")
 async def trigger_ollama_auto_setup(req: OllamaAutoSetupRequest):
-    """Inicia la descarga e instalación automática de Ollama + el modelo ligero elegido."""
+    """Inicia la descarga e instalación automática de Ollama + el modelo elegido."""
     return ollama_setup_manager.start_auto_setup(req.model)
+
+@app.post("/api/ollama/delete-model")
+async def delete_ollama_model(req: OllamaAutoSetupRequest):
+    """Elimina un modelo descargado en Ollama para liberar espacio."""
+    ok = ollama_setup_manager.delete_model(req.model)
+    if not ok:
+        raise HTTPException(status_code=400, detail=f"No se pudo eliminar el modelo {req.model}")
+    return ollama_setup_manager.get_status()
+
+@app.post("/api/rules/import", response_model=list[CustomRule])
+async def import_custom_rules(req: ImportRulesRequest):
+    """Importa reglas personalizadas desde un archivo JSON."""
+    return import_rules_batch(req.rules)
+
+@app.post("/api/cleaner/compress-zip")
+async def compress_and_clean_files(req: CompressZipRequest):
+    """Comprime los archivos seleccionados en un .zip de respaldo y mueve los originales a cuarentena."""
+    target_path = Path(req.target_folder).resolve()
+    if not target_path.exists():
+        raise HTTPException(status_code=404, detail="La carpeta objetivo no existe.")
+    scan_res = scan_directory(target_path, include_shortcuts=True)
+    file_map = {f.id: f.path for f in scan_res.files}
+    paths_to_zip = [file_map[fid] for fid in req.file_ids_to_clean if fid in file_map]
+    zip_info = archive_old_files_to_zip(target_path, paths_to_zip)
+    clean_res = execute_clean_action(
+        target_path,
+        CleanActionRequest(
+            target_folder=str(target_path),
+            file_ids_to_clean=req.file_ids_to_clean,
+            destination_action="archive",
+        ),
+    )
+    return {
+        "zip_info": zip_info,
+        "clean_result": clean_res,
+    }
+
+@app.get("/manifest.json", include_in_schema=False)
+async def serve_manifest():
+    """Web App Manifest para que Windows 10/11 muestre el icono oficial en la barra de tareas."""
+    return {
+        "name": "TidyDesk AI — Pro Studio",
+        "short_name": "TidyDesk AI",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#07090e",
+        "theme_color": "#4f46e5",
+        "icons": [
+            {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+            {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+        ],
+    }
+
+@app.get("/icon-192.png", include_in_schema=False)
+async def serve_icon_192():
+    img = create_pro_brand_icon(192)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return Response(content=buf.getvalue(), media_type="image/png")
+
+@app.get("/icon-512.png", include_in_schema=False)
+async def serve_icon_512():
+    img = create_pro_brand_icon(512)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return Response(content=buf.getvalue(), media_type="image/png")
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def serve_favicon():
-    """Genera un icono .ico en memoria para la ventana de aplicación nativa de Windows."""
-    from PIL import Image, ImageDraw
-    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
-    draw.rounded_rectangle([(2, 2), (30, 30)], radius=7, fill=(79, 70, 229, 255))
-    draw.rounded_rectangle([(7, 11), (25, 23)], radius=3, fill=(255, 255, 255, 240))
+    """Genera un icono .ico multi-resolución HD para la barra de tareas y título de Windows."""
+    img = create_pro_brand_icon(256)
     buf = io.BytesIO()
-    img.save(buf, format="ICO")
+    img.save(buf, format="ICO", sizes=[(256, 256), (64, 64), (32, 32), (16, 16)])
     return Response(content=buf.getvalue(), media_type="image/x-icon")
 
 # Montar frontend para servir la aplicación web en http://localhost:8000

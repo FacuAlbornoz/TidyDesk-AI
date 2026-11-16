@@ -7,6 +7,7 @@ let currentTargetFolder = "";
 let scannedFiles = [];
 let currentPlan = [];
 let currentRules = [];
+let allHistoryTransactions = [];
 let defaultFolders = {};
 
 // Inicialización al cargar la página
@@ -17,6 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadHistory();
   await loadGuardianStatus();
   await loadOllamaSetupStatus();
+  await loadStartupStatus();
   setInterval(loadGuardianStatus, 3000);
 });
 
@@ -255,6 +257,7 @@ async function startScanAndPlan() {
     const scanData = await scanRes.json();
     currentTargetFolder = scanData.target_folder;
     scannedFiles = scanData.files || [];
+    renderStorageBreakdown(scannedFiles);
 
     if (scannedFiles.length === 0) {
       showEmpty();
@@ -495,18 +498,28 @@ async function loadRules() {
 function renderRulesList() {
   const container = document.getElementById("rules-list");
   const empty = document.getElementById("rules-empty");
+  const searchQuery = (document.getElementById("rules-search-input")?.value || "").toLowerCase().trim();
   if (!container) return;
   container.innerHTML = "";
 
-  if (currentRules.length === 0) {
+  const filtered = currentRules.filter((r) => {
+    if (!searchQuery) return true;
+    return (
+      r.name.toLowerCase().includes(searchQuery) ||
+      r.destination_path.toLowerCase().includes(searchQuery) ||
+      r.patterns.some((p) => p.toLowerCase().includes(searchQuery))
+    );
+  });
+
+  if (filtered.length === 0) {
     if (empty) empty.classList.remove("hidden");
     return;
   }
   if (empty) empty.classList.add("hidden");
 
-  currentRules.forEach((rule) => {
+  filtered.forEach((rule) => {
     const card = document.createElement("div");
-    card.className = "bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-lg space-y-3";
+    card.className = "pro-card rounded-2xl p-5 space-y-3";
     
     card.innerHTML = `
       <div class="flex items-center justify-between border-b border-gray-800 pb-3">
@@ -627,66 +640,80 @@ async function loadHistory() {
     const res = await fetch("/api/history");
     if (!res.ok) return;
     const data = await res.json();
-    const transactions = data.transactions || [];
+    allHistoryTransactions = data.transactions || [];
 
     const badge = document.getElementById("history-badge");
     if (badge) {
-      badge.innerText = transactions.length;
-      badge.classList.toggle("hidden", transactions.length === 0);
+      badge.innerText = allHistoryTransactions.length;
+      badge.classList.toggle("hidden", allHistoryTransactions.length === 0);
     }
 
-    const list = document.getElementById("history-list");
-    const emptyState = document.getElementById("history-empty");
-
-    if (!list) return;
-    list.innerHTML = "";
-
-    if (transactions.length === 0) {
-      if (emptyState) emptyState.classList.remove("hidden");
-      return;
-    }
-    if (emptyState) emptyState.classList.add("hidden");
-
-    transactions.forEach((tx) => {
-      const card = document.createElement("div");
-      card.className = "bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-lg space-y-3";
-
-      const isReverted = tx.reverted;
-      card.innerHTML = `
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-gray-800 pb-3">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-mono bg-gray-800 text-gray-300 px-2 py-0.5 rounded border border-gray-700">${tx.transaction_id}</span>
-              ${isReverted ? '<span class="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-full font-bold">REVERTIDO (DESHECHO)</span>' : '<span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold">ACTIVO</span>'}
-            </div>
-            <p class="text-xs text-gray-400 mt-1">${tx.timestamp} • ${tx.moves?.length || 0} archivos organizados</p>
-          </div>
-          ${
-            !isReverted
-              ? `<button type="button" class="px-4 py-2 rounded-xl bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1.5" onclick="triggerRollback('${tx.transaction_id}')">
-                  <span>↩ Deshacer Lote</span>
-                 </button>`
-              : '<span class="text-xs text-gray-500 italic">Cambios ya restaurados</span>'
-          }
-        </div>
-        <div class="text-xs text-gray-400 space-y-1">
-          <p class="font-semibold text-gray-300 text-[11px] uppercase tracking-wider">Detalle de movimientos:</p>
-          <ul class="list-disc list-inside space-y-0.5 max-h-32 overflow-y-auto pr-2">
-            ${(tx.moves || [])
-              .map(
-                (m) =>
-                  `<li class="truncate"><span class="text-white">${m.file_name}</span> &rarr; <span class="text-brand-300">${m.new_path}</span></li>`
-              )
-              .join("")}
-          </ul>
-        </div>
-      `;
-      list.appendChild(card);
-    });
-
+    filterHistoryList();
   } catch (err) {
     console.error("Error al cargar historial:", err);
   }
+}
+
+function filterHistoryList() {
+  const query = (document.getElementById("history-search-input")?.value || "").toLowerCase().trim();
+  const list = document.getElementById("history-list");
+  const emptyState = document.getElementById("history-empty");
+  if (!list) return;
+  list.innerHTML = "";
+
+  const transactions = allHistoryTransactions.filter((tx) => {
+    if (!query) return true;
+    const matchId = (tx.transaction_id || "").toLowerCase().includes(query);
+    const matchFile = (tx.moves || []).some(
+      (m) =>
+        (m.file_name || "").toLowerCase().includes(query) ||
+        (m.new_path || "").toLowerCase().includes(query)
+    );
+    return matchId || matchFile;
+  });
+
+  if (transactions.length === 0) {
+    if (emptyState) emptyState.classList.remove("hidden");
+    return;
+  }
+  if (emptyState) emptyState.classList.add("hidden");
+
+  transactions.forEach((tx) => {
+    const card = document.createElement("div");
+    card.className = "pro-card rounded-2xl p-5 space-y-3";
+
+    const isReverted = tx.reverted;
+    card.innerHTML = `
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/[0.07] pb-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono bg-slate-900 text-slate-300 px-2 py-0.5 rounded border border-white/10">${tx.transaction_id}</span>
+            ${isReverted ? '<span class="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-full font-bold">REVERTIDO (DESHECHO)</span>' : '<span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold">ACTIVO</span>'}
+          </div>
+          <p class="text-xs text-slate-400 mt-1">${tx.timestamp} • ${tx.moves?.length || 0} archivos organizados</p>
+        </div>
+        ${
+          !isReverted
+            ? `<button type="button" class="px-4 py-2 rounded-xl bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1.5" onclick="triggerRollback('${tx.transaction_id}')">
+                <span>↩ Deshacer Lote</span>
+               </button>`
+            : '<span class="text-xs text-slate-500 italic">Cambios ya restaurados</span>'
+        }
+      </div>
+      <div class="text-xs text-slate-400 space-y-1">
+        <p class="font-semibold text-slate-300 text-[11px] uppercase tracking-wider">Detalle de movimientos:</p>
+        <ul class="list-disc list-inside space-y-0.5 max-h-32 overflow-y-auto pr-2">
+          ${(tx.moves || [])
+            .map(
+              (m) =>
+                `<li class="truncate"><span class="text-white">${m.file_name}</span> &rarr; <span class="text-brand-300">${m.new_path}</span></li>`
+            )
+            .join("")}
+        </ul>
+      </div>
+    `;
+    list.appendChild(card);
+  });
 }
 
 async function triggerRollback(txId) {
@@ -1165,7 +1192,87 @@ async function loadOllamaSetupStatus() {
     if (!res.ok) return;
     const st = await res.json();
 
-    const diskBadge = document.getElementById("ollama-disk-badge");
+    // 1. Actualizar Barra Ejecutiva de Telemetría de Hardware
+    if (st.hardware) {
+      const hw = st.hardware;
+      const cpuEl = document.getElementById("hw-bar-cpu");
+      const ramEl = document.getElementById("hw-bar-ram");
+      const gpuEl = document.getElementById("hw-bar-gpu");
+      const diskEl = document.getElementById("hw-bar-disk");
+      const tierBadge = document.getElementById("hw-tier-badge");
+
+      if (cpuEl) cpuEl.innerText = `${hw.cpu_name} (${hw.cpu_cores} hilos)`;
+      if (ramEl) ramEl.innerText = `RAM: ${hw.total_ram_gb} GB (${hw.avail_ram_gb} GB libres)`;
+      if (gpuEl) {
+        const vramTxt = hw.gpu_vram_gb > 0 ? ` · ${hw.gpu_vram_gb} GB VRAM` : "";
+        gpuEl.innerText = `${hw.gpu_name}${vramTxt}`;
+      }
+      if (diskEl) diskEl.innerText = `Disco libre: ${hw.free_disk_gb} GB`;
+      if (tierBadge) tierBadge.innerText = `🏆 ${hw.tier_label}`;
+    }
+
+    // 2. Actualizar Modelos Instalados en tu PC (Selector + Chips con opción de eliminar)
+    const countBadge = document.getElementById("installed-models-count-badge");
+    const chipsContainer = document.getElementById("installed-models-chips");
+    const activeSelect = document.getElementById("select-ollama-model");
+    const installedDetails = st.installed_models_detail || [];
+
+    if (countBadge) {
+      countBadge.innerText = `${installedDetails.length} ${installedDetails.length === 1 ? "instalado" : "instalados"}`;
+    }
+
+    if (activeSelect && installedDetails.length > 0 && document.activeElement !== activeSelect) {
+      const prevVal = activeSelect.value;
+      activeSelect.innerHTML = "";
+      installedDetails.forEach((m) => {
+        const opt = document.createElement("option");
+        opt.value = m.name;
+        opt.textContent = `✅ ${m.name} (${m.size_formatted} en disco)`;
+        activeSelect.appendChild(opt);
+      });
+      if (installedDetails.some((m) => m.name === prevVal)) {
+        activeSelect.value = prevVal;
+      }
+    }
+
+    if (chipsContainer) {
+      chipsContainer.innerHTML = "";
+      if (installedDetails.length === 0) {
+        chipsContainer.innerHTML = `<span class="text-[10px] text-amber-300">Aún no hay modelos descargados en esta PC. Descargá uno abajo en 1 clic.</span>`;
+      } else {
+        installedDetails.forEach((m) => {
+          const pill = document.createElement("div");
+          pill.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-[10px] text-emerald-300 font-medium";
+          pill.innerHTML = `
+            <span class="cursor-pointer hover:underline" onclick="selectActiveOllamaModel('${m.name}')" title="Usar este modelo">✅ ${m.name} (${m.size_formatted})</span>
+            <button type="button" onclick="deleteInstalledOllamaModel('${m.name}')" class="text-slate-400 hover:text-rose-400 font-bold ml-1" title="Eliminar modelo de tu disco">×</button>
+          `;
+          chipsContainer.appendChild(pill);
+        });
+      }
+    }
+
+    // 3. Poblar Catálogo con etiquetas [YA INSTALADO] y [RECOMENDADO PARA TU PC]
+    const installSelect = document.getElementById("ollama-install-model-select");
+    if (installSelect && st.catalog && document.activeElement !== installSelect) {
+      const prevInstallVal = installSelect.value;
+      installSelect.innerHTML = "";
+      st.catalog.forEach((item) => {
+        const opt = document.createElement("option");
+        opt.value = item.id;
+        const instTag = item.installed ? "✅ [YA INSTALADO] " : "⬇️ ";
+        const recTag = item.recommended_for_pc ? " — 🏆 IDEAL PARA TU PC" : "";
+        opt.textContent = `${instTag}${item.id} (${item.size_label})${recTag}`;
+        installSelect.appendChild(opt);
+      });
+      if (st.catalog.some((c) => c.id === prevInstallVal)) {
+        installSelect.value = prevInstallVal;
+      } else if (st.hardware?.recommended_model) {
+        installSelect.value = st.hardware.recommended_model;
+      }
+    }
+
+    // 4. Actualizar Descripción de Recomendación de Hardware y Progreso
     const titleEl = document.getElementById("ollama-setup-title");
     const descEl = document.getElementById("ollama-setup-desc");
     const btnEl = document.getElementById("btn-ollama-autosetup");
@@ -1173,25 +1280,23 @@ async function loadOllamaSetupStatus() {
     const progBar = document.getElementById("ollama-progress-bar");
     const progTxt = document.getElementById("ollama-progress-text");
 
-    if (diskBadge && st.free_disk_gb) {
-      diskBadge.innerText = `Disco libre: ${st.free_disk_gb} GB`;
+    if (st.hardware?.recommendation_reason && descEl) {
+      descEl.innerText = st.hardware.recommendation_reason;
     }
 
-    if (st.installed && st.running && st.models && st.models.length > 0 && !st.is_working) {
-      if (titleEl) titleEl.innerText = "Ollama Activo en esta PC";
-      if (descEl) descEl.innerText = `Modelos instalados (${st.models.length}). Podés descargar otro modelo ligero en 1 clic si querés:`;
+    if (!st.installed && !st.is_working) {
+      if (titleEl) titleEl.innerText = "Ollama no detectado — Auto-Instalador 1-Clic";
       if (btnEl) {
         btnEl.disabled = false;
-        btnEl.innerText = "⬇️ Descargar Modelo";
+        btnEl.innerHTML = `<span>⚡ Auto-Instalar Ollama + Modelo Seleccionado</span>`;
+      }
+    } else if (!st.is_working) {
+      if (titleEl) titleEl.innerText = "Diagnóstico de Hardware & Gestor de Modelos";
+      if (btnEl) {
+        btnEl.disabled = false;
+        btnEl.innerHTML = `<span>⬇️ Descargar / Actualizar Modelo Seleccionado</span>`;
       }
       if (progWrap && st.setup_state !== "ready") progWrap.classList.add("hidden");
-    } else if (!st.installed && !st.is_working) {
-      if (titleEl) titleEl.innerText = "Ollama no detectado en esta PC";
-      if (descEl) descEl.innerText = "Instalá Ollama y descargá un modelo local automáticamente con 1 solo clic:";
-      if (btnEl) {
-        btnEl.disabled = false;
-        btnEl.innerText = "⚡ Auto-Instalar IA";
-      }
     }
 
     if (st.is_working || st.setup_state === "ready" || st.setup_state === "error") {
@@ -1202,7 +1307,7 @@ async function loadOllamaSetupStatus() {
       if (st.is_working) {
         if (btnEl) {
           btnEl.disabled = true;
-          btnEl.innerText = "Instalando...";
+          btnEl.innerText = "Descargando e instalando en segundo plano...";
         }
         if (!ollamaPollTimer) {
           ollamaPollTimer = setInterval(loadOllamaSetupStatus, 1500);
@@ -1222,6 +1327,31 @@ async function loadOllamaSetupStatus() {
   }
 }
 
+function selectActiveOllamaModel(modelName) {
+  const activeSelect = document.getElementById("select-ollama-model");
+  if (activeSelect) {
+    activeSelect.value = modelName;
+    showToast("Modelo Seleccionado", `Usando ${modelName} como motor local activo.`);
+  }
+}
+
+async function deleteInstalledOllamaModel(modelName) {
+  if (!confirm(`¿Deseás desinstalar el modelo '${modelName}' para liberar espacio en disco?`)) return;
+  try {
+    const res = await fetch("/api/ollama/delete-model", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: modelName }),
+    });
+    if (!res.ok) throw new Error("No se pudo eliminar el modelo");
+    showToast("Modelo Eliminado", `Se liberó el espacio ocupado por ${modelName}.`);
+    await loadOllamaSetupStatus();
+    await checkHealth();
+  } catch (err) {
+    showToast("Error al eliminar", err.message, "error");
+  }
+}
+
 async function triggerOllamaAutoSetup() {
   const modelSelect = document.getElementById("ollama-install-model-select");
   const chosenModel = modelSelect ? modelSelect.value : "llama3.2:1b";
@@ -1233,12 +1363,190 @@ async function triggerOllamaAutoSetup() {
       body: JSON.stringify({ model: chosenModel }),
     });
     if (!res.ok) throw new Error("No se pudo iniciar el instalador automático");
-    showToast("Iniciando Instalación IA", `Configurando Ollama y el modelo ${chosenModel} en segundo plano...`);
+    showToast("Iniciando Instalación IA", `Descargando ${chosenModel} en segundo plano...`);
     await loadOllamaSetupStatus();
     if (!ollamaPollTimer) {
       ollamaPollTimer = setInterval(loadOllamaSetupStatus, 1500);
     }
   } catch (err) {
     showToast("Error en Auto-Setup", err.message, "error");
+  }
+}
+
+// ==========================================
+// 13. FUNCIONES PRO STUDIO V2.2 (STORAGE BAR, ZIP, EXPORT/IMPORT, STARTUP)
+// ==========================================
+
+function renderStorageBreakdown(files) {
+  const card = document.getElementById("storage-breakdown-card");
+  const bar = document.getElementById("storage-bar-segments");
+  const legend = document.getElementById("storage-bar-legend");
+  const totalLabel = document.getElementById("storage-total-label");
+
+  if (!card || !bar || !legend) return;
+
+  if (!files || files.length === 0) {
+    card.classList.add("hidden");
+    return;
+  }
+
+  const categories = {
+    "Videos y Multimedia": { bytes: 0, color: "bg-indigo-500", dot: "bg-indigo-400", exts: [".mp4", ".mkv", ".avi", ".mov", ".mp3", ".wav", ".flac"] },
+    "Instaladores y Apps": { bytes: 0, color: "bg-rose-500", dot: "bg-rose-400", exts: [".exe", ".msi", ".iso", ".bat", ".apk"] },
+    "Documentos y PDFs": { bytes: 0, color: "bg-emerald-500", dot: "bg-emerald-400", exts: [".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv"] },
+    "Imágenes y Diseño": { bytes: 0, color: "bg-sky-500", dot: "bg-sky-400", exts: [".png", ".jpg", ".jpeg", ".webp", ".svg", ".psd", ".ai", ".gif"] },
+    "Modelos 3D y CAD": { bytes: 0, color: "bg-amber-500", dot: "bg-amber-400", exts: [".stl", ".step", ".stp", ".3mf", ".gcode", ".obj", ".blend"] },
+    "Comprimidos y Otros": { bytes: 0, color: "bg-purple-500", dot: "bg-purple-400", exts: [] },
+  };
+
+  let totalBytes = 0;
+  files.forEach((f) => {
+    const b = f.size_bytes || 0;
+    totalBytes += b;
+    const ext = (f.extension || "").toLowerCase();
+    let matched = false;
+    for (const [catName, info] of Object.entries(categories)) {
+      if (info.exts.includes(ext)) {
+        info.bytes += b;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
+      categories["Comprimidos y Otros"].bytes += b;
+    }
+  });
+
+  if (totalBytes <= 0) {
+    card.classList.add("hidden");
+    return;
+  }
+
+  card.classList.remove("hidden");
+  const totalMb = (totalBytes / (1024 * 1024)).toFixed(1);
+  if (totalLabel) totalLabel.innerText = `${files.length} archivos · ${totalMb} MB en total`;
+
+  bar.innerHTML = "";
+  legend.innerHTML = "";
+
+  for (const [catName, info] of Object.entries(categories)) {
+    if (info.bytes <= 0) continue;
+    const pct = Math.max(2, Math.round((info.bytes / totalBytes) * 100));
+    const mb = (info.bytes / (1024 * 1024)).toFixed(1);
+
+    const seg = document.createElement("div");
+    seg.className = `${info.color} h-full first:rounded-l-full last:rounded-r-full transition-all`;
+    seg.style.width = `${pct}%`;
+    seg.title = `${catName}: ${mb} MB (${pct}%)`;
+    bar.appendChild(seg);
+
+    const legItem = document.createElement("div");
+    legItem.className = "flex items-center gap-1.5";
+    legItem.innerHTML = `
+      <span class="w-2.5 h-2.5 rounded-full ${info.dot}"></span>
+      <span class="font-medium text-white">${catName}:</span>
+      <span class="font-mono text-slate-400">${mb} MB (${pct}%)</span>
+    `;
+    legend.appendChild(legItem);
+  }
+}
+
+async function compressSelectedToZip() {
+  if (selectedCleanerIds.size === 0) return;
+
+  const confirmed = confirm(
+    `¿Comprimir ${selectedCleanerIds.size} elementos en un archivo .ZIP de respaldo (Cold Storage) y limpiar los originales con opción de Rollback?`
+  );
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch("/api/cleaner/compress-zip", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        target_folder: currentTargetFolder,
+        file_ids_to_clean: Array.from(selectedCleanerIds),
+      }),
+    });
+    if (!res.ok) throw new Error("Error al comprimir en .ZIP");
+    const data = await res.json();
+    const z = data.zip_info || {};
+    showToast(
+      "📦 Archivo .ZIP Creado",
+      `Guardado en ${z.zip_name} (${z.archived_count} archivos, ahorrando ${z.net_saved_mb} MB adicionales).`
+    );
+    await loadHistory();
+    await startCleanerAudit();
+  } catch (err) {
+    showToast("Error al comprimir", err.message, "error");
+  }
+}
+
+function exportCustomRules() {
+  if (!currentRules || currentRules.length === 0) {
+    showToast("Sin reglas", "No hay reglas personalizadas para exportar.", "warning");
+    return;
+  }
+  const blob = new Blob([JSON.stringify(currentRules, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "tidydesk_reglas_personalizadas.json";
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("Reglas Exportadas", "Se descargó tidydesk_reglas_personalizadas.json.");
+}
+
+async function importCustomRulesFile(inputEl) {
+  const file = inputEl?.files?.[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    const rulesArray = Array.isArray(parsed) ? parsed : parsed.rules || [];
+    const res = await fetch("/api/rules/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rules: rulesArray }),
+    });
+    if (!res.ok) throw new Error("Archivo JSON inválido");
+    await loadRules();
+    showToast("Reglas Importadas", "Tus reglas personalizadas se agregaron con éxito.");
+  } catch (err) {
+    showToast("Error al importar", err.message, "error");
+  } finally {
+    inputEl.value = "";
+  }
+}
+
+async function loadStartupStatus() {
+  try {
+    const res = await fetch("/api/system/startup");
+    if (!res.ok) return;
+    const data = await res.json();
+    const chk = document.getElementById("toggle-win-startup");
+    if (chk) chk.checked = Boolean(data.enabled);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function onWindowsStartupToggle(enabled) {
+  try {
+    const res = await fetch("/api/system/startup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled }),
+    });
+    if (!res.ok) throw new Error("No se pudo actualizar el inicio de Windows");
+    const data = await res.json();
+    showToast(
+      data.enabled ? "🚀 Inicio con Windows Activado" : "Inicio con Windows Desactivado",
+      data.enabled
+        ? "TidyDesk AI arrancará minimizado en la bandeja al encender tu PC."
+        : "Se quitó TidyDesk AI del arranque automático de Windows."
+    );
+  } catch (err) {
+    showToast("Error", err.message, "error");
   }
 }

@@ -45,6 +45,7 @@ debug_*.py
 
 # Local user data (history and custom rules per PC)
 data/*.json
+data/window_profile/
 !data/.gitkeep
 
 # PyInstaller build artifacts

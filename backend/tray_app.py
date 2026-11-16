@@ -1,15 +1,22 @@
 import os
 import sys
 import time
+import ctypes
 import shutil
 import socket
 import threading
 import subprocess
 import webbrowser
 from pathlib import Path
-from PIL import Image, ImageDraw
+from PIL import Image
 import pystray
 import uvicorn
+
+# Registrar AppUserModelID en Windows 10/11 para barra de tareas y notificaciones
+try:
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("FacuAlbornoz.TidyDeskAI.ProStudio.2.2")
+except Exception:
+    pass
 
 # Asegurar que el directorio backend esté en sys.path
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -17,15 +24,15 @@ if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 # En modo sin consola (pythonw.exe o PyInstaller --noconsole), stdout/stderr son None
-# Redirigirlos a devnull evita que el logger de Uvicorn falle al consultar .isatty()
 if sys.stdout is None:
     sys.stdout = open(os.devnull, "w", encoding="utf-8")
 if sys.stderr is None:
     sys.stderr = open(os.devnull, "w", encoding="utf-8")
 
 from app.main import app
-from app.config import DESKTOP_DIR, DOWNLOADS_DIR
+from app.config import DESKTOP_DIR, DOWNLOADS_DIR, DATA_DIR
 from app.core.guardian import guardian_manager, send_windows_toast
+from app.core.system_utils import create_pro_brand_icon
 
 APP_URL = "http://127.0.0.1:8000"
 PORT = 8000
@@ -39,7 +46,13 @@ def is_port_in_use(port: int = PORT) -> bool:
 
 
 def open_native_app_window(url: str = APP_URL) -> None:
-    """Abre TidyDesk AI como ventana de aplicación de escritorio nativa (sin barra de URL ni pestañas)."""
+    """Abre TidyDesk AI como ventana de aplicación de escritorio nativa con su propio perfil de icono."""
+    profile_dir = DATA_DIR / "window_profile"
+    try:
+        profile_dir.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        pass
+
     candidates = [
         shutil.which("msedge"),
         r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
@@ -55,7 +68,14 @@ def open_native_app_window(url: str = APP_URL) -> None:
             try:
                 creation_flags = getattr(subprocess, "CREATE_NO_WINDOW", 0x08000000)
                 subprocess.Popen(
-                    [bin_path, f"--app={url}", "--window-size=1280,840"],
+                    [
+                        bin_path,
+                        f"--app={url}",
+                        "--window-size=1340,860",
+                        f"--user-data-dir={profile_dir}",
+                        "--no-first-run",
+                        "--no-default-browser-check",
+                    ],
                     creationflags=creation_flags,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
@@ -64,41 +84,12 @@ def open_native_app_window(url: str = APP_URL) -> None:
             except Exception:
                 continue
 
-    # Fallback en caso extremo
     webbrowser.open(url)
 
 
 def create_tray_icon_image(guardian_active: bool = False) -> Image.Image:
-    """Genera dinámicamente el icono de TidyDesk AI para la bandeja del sistema (64x64)."""
-    size = 64
-    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
-
-    # Fondo redondeado índigo
-    draw.rounded_rectangle(
-        [(4, 4), (size - 4, size - 4)],
-        radius=14,
-        fill=(79, 70, 229, 255),  # #4f46e5
-    )
-
-    # Silueta de carpeta blanca en el centro
-    draw.rounded_rectangle(
-        [(14, 22), (50, 46)],
-        radius=5,
-        fill=(255, 255, 255, 240),
-    )
-    # Solapa superior de la carpeta
-    draw.polygon(
-        [(14, 24), (14, 18), (28, 18), (32, 24)],
-        fill=(224, 231, 255, 255),
-    )
-
-    # Indicador circular de estado en la esquina inferior derecha
-    badge_color = (16, 185, 129, 255) if guardian_active else (56, 189, 248, 255)
-    draw.ellipse([(42, 42), (58, 58)], fill=(15, 23, 42, 255))
-    draw.ellipse([(44, 44), (56, 56)], fill=badge_color)
-
-    return img
+    """Genera el icono oficial HD de TidyDesk AI para la bandeja del sistema."""
+    return create_pro_brand_icon(size=128, guardian_active=guardian_active)
 
 
 class TidyDeskTrayApp:

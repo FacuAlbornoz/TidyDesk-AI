@@ -56,6 +56,7 @@ Puedes consultar el detalle técnico de cada versión en **[CHANGELOG.md](CHANGE
 * **[v1.4.0]** ✅ Modo Guardián en segundo plano (Watchdog) con notificaciones nativas de Windows.
 * **[v2.0.0]** ✅ App de escritorio con icono en la bandeja del sistema (System Tray), lanzador silencioso y compilador `.exe`.
 * **[v2.1.0]** ✅ Ventana nativa de escritorio (`--app`), selector visual de carpetas de Windows (`📂 Examinar...`) y auto-instalador de Ollama + modelos en 1 clic.
+* **[v2.2.0]** ✅ Edición **Pro Studio**: Rediseño visual, logo HD en barra de tareas Windows 11, escáner de hardware (CPU/RAM/GPU), gestor de modelos instalados, barra de almacenamiento, compresor `.ZIP`, exportar/importar reglas e inicio con Windows.
 
 ---
 

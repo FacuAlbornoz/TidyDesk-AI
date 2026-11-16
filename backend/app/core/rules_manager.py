@@ -60,6 +60,28 @@ def toggle_rule(rule_id: str) -> Optional[CustomRule]:
         save_rules(rules)
     return target_rule
 
+def import_rules_batch(incoming_items: List[dict]) -> List[CustomRule]:
+    """Importa un lote de reglas desde un archivo JSON evitando duplicar nombres exactos."""
+    existing = load_rules()
+    existing_names = {r.name.lower().strip() for r in existing}
+    for item in incoming_items:
+        name = str(item.get("name", "")).strip()
+        if not name or name.lower() in existing_names:
+            continue
+        existing.append(
+            CustomRule(
+                id=f"rule_{uuid.uuid4().hex[:8]}",
+                name=name,
+                pattern_type=item.get("pattern_type", "extension"),
+                patterns=[str(p).strip().lower() for p in item.get("patterns", []) if str(p).strip()],
+                destination_path=str(item.get("destination_path", "")).strip(),
+                enabled=bool(item.get("enabled", True)),
+            )
+        )
+        existing_names.add(name.lower())
+    save_rules(existing)
+    return existing
+
 def match_custom_rule(file_name: str, file_ext: str) -> Optional[Tuple[str, str]]:
     """Evalúa si un archivo coincide con alguna regla personalizada activa.
     Retorna (destination_path, reason) o None si no hay coincidencia.
