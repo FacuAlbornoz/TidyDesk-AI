@@ -1,0 +1,30 @@
+[
+  {
+    "id": "rule_3d_printing",
+    "name": "Modelos Impresión 3D",
+    "pattern_type": "extension",
+    "patterns": [
+      ".stl",
+      ".step",
+      ".gcode",
+      ".3mf",
+      ".obj"
+    ],
+    "destination_path": "D:\\Facu\\Impresora 3d",
+    "enabled": true
+  },
+  {
+    "id": "rule_facultad_itec",
+    "name": "Facultad / ITEC",
+    "pattern_type": "keyword",
+    "patterns": [
+      "itec",
+      "seminario",
+      "parcial",
+      "tp",
+      "practico"
+    ],
+    "destination_path": "D:\\Facu\\Itec",
+    "enabled": true
+  }
+]

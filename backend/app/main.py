@@ -19,9 +19,11 @@ from app.schemas.organize import (
     RollbackRequest,
     RollbackResponse,
 )
+from app.schemas.rules import CustomRule, CustomRuleCreate
 from app.core.scanner import scan_directory, resolve_target_folder
 from app.core.organizer import execute_plan, rollback_transaction
 from app.core.history import load_history
+from app.core.rules_manager import load_rules, create_rule, delete_rule, toggle_rule
 from app.ai.ollama_provider import OllamaProvider
 from app.ai.gemini_provider import GeminiProvider
 from app.ai.rules_provider import SmartRulesProvider
@@ -148,6 +150,35 @@ async def rollback(request: RollbackRequest):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al revertir la transacción: {str(e)}")
+
+# ==========================================
+# ENDPOINTS: REGLAS PERSONALIZADAS (V1.1)
+# ==========================================
+@app.get("/api/rules", response_model=list[CustomRule])
+async def get_rules():
+    """Retorna las reglas personalizadas configuradas."""
+    return load_rules()
+
+@app.post("/api/rules", response_model=CustomRule)
+async def add_rule(rule_data: CustomRuleCreate):
+    """Crea una nueva regla personalizada."""
+    return create_rule(rule_data)
+
+@app.delete("/api/rules/{rule_id}")
+async def remove_rule(rule_id: str):
+    """Elimina una regla personalizada."""
+    deleted = delete_rule(rule_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Regla no encontrada")
+    return {"success": True, "rule_id": rule_id}
+
+@app.post("/api/rules/{rule_id}/toggle", response_model=CustomRule)
+async def toggle_rule_status(rule_id: str):
+    """Activa o desactiva una regla personalizada."""
+    rule = toggle_rule(rule_id)
+    if not rule:
+        raise HTTPException(status_code=404, detail="Regla no encontrada")
+    return rule
 
 # Montar frontend para servir la aplicación web en http://localhost:8000
 if FRONTEND_DIR.exists():

@@ -64,19 +64,23 @@
         <div>
           <span class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
             TidyDesk <span class="text-brand-400 font-extrabold">AI</span>
-            <span class="text-[10px] bg-brand-500/20 text-brand-300 font-semibold px-2 py-0.5 rounded-full border border-brand-500/30">v1.0 Local</span>
+            <span class="text-[10px] bg-brand-500/20 text-brand-300 font-semibold px-2 py-0.5 rounded-full border border-brand-500/30">v1.1</span>
           </span>
           <span class="text-xs text-gray-400 hidden sm:block">Organizador Inteligente y Seguro de Archivos</span>
         </div>
       </div>
 
-      <!-- Estado de Proveedores & Tabs -->
+      <!-- Pestañas de Vista y Estado -->
       <div class="flex items-center gap-3 sm:gap-4">
         
-        <!-- Pestañas de Vista -->
+        <!-- Pestañas de Navegación -->
         <div class="flex bg-gray-800/80 p-1 rounded-xl border border-gray-700/60 text-xs font-medium">
           <button id="tab-organizer-btn" class="px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all" onclick="switchTab('organizer')">
             Organizador
+          </button>
+          <button id="tab-rules-btn" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5" onclick="switchTab('rules')">
+            <span>⭐ Reglas</span>
+            <span id="rules-badge" class="bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded-full text-[10px]">2</span>
           </button>
           <button id="tab-history-btn" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5" onclick="switchTab('history')">
             <span>Historial (Undo)</span>
@@ -124,6 +128,7 @@
               <span class="text-[11px] text-gray-400" id="path-preview-downloads">C:\Users\...\Downloads</span>
             </button>
           </div>
+
           <!-- Toggle para Accesos Directos (.lnk) -->
           <div class="p-3.5 rounded-xl bg-gray-800/80 border border-gray-700 space-y-1.5">
             <label class="flex items-center justify-between cursor-pointer">
@@ -183,7 +188,7 @@
               3. Auditoría y Plan
             </h2>
             <p class="text-xs text-gray-400 leading-relaxed">
-              Escanea la carpeta seleccionada y genera una propuesta de clasificación sin mover nada todavía.
+              Escanea la carpeta aplicando tus <strong class="text-brand-300">Reglas Personalizadas</strong> y el motor de IA seleccionado.
             </p>
           </div>
           <div class="pt-4 space-y-2">
@@ -239,7 +244,7 @@
               <h2 class="text-base font-bold text-white">Plan de Organización (Dry-Run)</h2>
             </div>
             <p class="text-xs text-gray-400 mt-0.5">
-              Revisá la propuesta de la IA. Podés editar las carpetas de destino o desmarcar lo que no quieras mover.
+              Revisá la propuesta. Podés editar las carpetas de destino o desmarcar lo que no quieras mover.
             </p>
           </div>
           
@@ -263,7 +268,7 @@
                 </th>
                 <th class="py-3 px-4">Archivo Original</th>
                 <th class="py-3 px-4">Carpeta Destino</th>
-                <th class="py-3 px-4">Motivo / Clasificación IA</th>
+                <th class="py-3 px-4">Motivo / Clasificación</th>
                 <th class="py-3 px-4 text-right">Tamaño</th>
               </tr>
             </thead>
@@ -277,7 +282,81 @@
 
     </div>
 
-    <!-- PESTAÑA 2: HISTORIAL Y ROLLBACK -->
+    <!-- PESTAÑA 2: REGLAS PERSONALIZADAS (V1.1) -->
+    <div id="view-rules" class="hidden space-y-6">
+      
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <span>⭐ Reglas de Destino Personalizadas</span>
+            <span class="text-[10px] font-bold bg-brand-500/20 text-brand-300 px-2.5 py-0.5 rounded-full border border-brand-500/30">V1.1</span>
+          </h2>
+          <p class="text-xs text-gray-400 mt-0.5 max-w-2xl">
+            Definí reglas fijas para enviar archivos a carpetas externas (ej: archivos 3D a <code class="text-brand-300">D:\Facu\Impresora 3d</code> o entregas a <code class="text-brand-300">D:\Facu\Itec</code>). Tus reglas tienen prioridad absoluta sobre la IA.
+          </p>
+        </div>
+        <button type="button" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-brand-600/30" onclick="toggleNewRuleModal(true)">
+          <span>+ Nueva Regla</span>
+        </button>
+      </div>
+
+      <!-- Formulario / Modal para crear regla -->
+      <div id="new-rule-card" class="hidden bg-gray-900 border border-brand-500/40 rounded-2xl p-5 shadow-2xl space-y-4">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>➕ Crear Nueva Regla de Destino</span>
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          <div class="space-y-1">
+            <label class="text-gray-400 font-semibold">Nombre de la Regla:</label>
+            <input type="text" id="rule-input-name" placeholder="Ej: Impresión 3D" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
+          </div>
+          <div class="space-y-1">
+            <label class="text-gray-400 font-semibold">Tipo de Filtro:</label>
+            <select id="rule-input-type" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500">
+              <option value="extension">Por Extensión (ej: .stl, .gcode)</option>
+              <option value="keyword">Por Palabra Clave (ej: parcial, tp, factura)</option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <label class="text-gray-400 font-semibold">Patrones (separados por coma):</label>
+            <input type="text" id="rule-input-patterns" placeholder="ej: .stl, .step, .gcode" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
+          </div>
+          <div class="space-y-1">
+            <label class="text-gray-400 font-semibold">Carpeta de Destino (Ruta completa):</label>
+            <input type="text" id="rule-input-dest" placeholder="ej: D:\Facu\Impresora 3d" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
+          </div>
+        </div>
+        
+        <!-- Accesos rápidos a carpetas de Facu -->
+        <div class="flex items-center gap-2 pt-1 text-[11px] text-gray-400">
+          <span>Sugerencias rápidas:</span>
+          <button type="button" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 rounded text-brand-300 border border-gray-700" onclick="setQuickDest('D:\\Facu\\Impresora 3d')">📁 Impresora 3D</button>
+          <button type="button" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 rounded text-brand-300 border border-gray-700" onclick="setQuickDest('D:\\Facu\\Itec')">📁 ITEC / Facultad</button>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t border-gray-800">
+          <button type="button" class="px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold" onclick="toggleNewRuleModal(false)">
+            Cancelar
+          </button>
+          <button type="button" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold" onclick="saveNewRule()">
+            Guardar Regla
+          </button>
+        </div>
+      </div>
+
+      <!-- Grilla de Tarjetas de Reglas -->
+      <div id="rules-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Tarjetas dinámicas generadas en app.js -->
+      </div>
+
+      <div id="rules-empty" class="hidden py-16 text-center text-gray-500 space-y-2">
+        <span class="text-3xl block">⚙️</span>
+        <p class="text-sm">No tenés reglas activas en este momento.</p>
+      </div>
+
+    </div>
+
+    <!-- PESTAÑA 3: HISTORIAL Y ROLLBACK -->
     <div id="view-history" class="hidden space-y-6">
       
       <div class="flex items-center justify-between">

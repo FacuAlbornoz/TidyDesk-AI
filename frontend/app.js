@@ -1,15 +1,17 @@
-// TidyDesk AI - Frontend Controller
+// TidyDesk AI - Frontend Controller (v1.1)
 
 let currentFolderType = "desktop";
 let currentTargetFolder = "";
 let scannedFiles = [];
 let currentPlan = [];
+let currentRules = [];
 let defaultFolders = {};
 
 // Inicialización al cargar la página
 document.addEventListener("DOMContentLoaded", async () => {
   loadSavedGeminiKey();
   await checkHealth();
+  await loadRules();
   await loadHistory();
 });
 
@@ -74,23 +76,36 @@ async function checkHealth() {
   }
 }
 
-// 2. Navegación por Pestañas
+// 2. Navegación por Pestañas (Organizador / Reglas / Historial)
 function switchTab(tab) {
   const viewOrganizer = document.getElementById("view-organizer");
+  const viewRules = document.getElementById("view-rules");
   const viewHistory = document.getElementById("view-history");
+  
   const btnOrganizer = document.getElementById("tab-organizer-btn");
+  const btnRules = document.getElementById("tab-rules-btn");
   const btnHistory = document.getElementById("tab-history-btn");
+
+  // Ocultar todas las vistas
+  viewOrganizer.classList.add("hidden");
+  viewRules.classList.add("hidden");
+  viewHistory.classList.add("hidden");
+
+  // Estilos inactivos
+  btnOrganizer.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all";
+  btnRules.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5";
+  btnHistory.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5";
 
   if (tab === "organizer") {
     viewOrganizer.classList.remove("hidden");
-    viewHistory.classList.add("hidden");
     btnOrganizer.className = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all";
-    btnHistory.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5";
-  } else {
-    viewOrganizer.classList.add("hidden");
+  } else if (tab === "rules") {
+    viewRules.classList.remove("hidden");
+    btnRules.className = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all flex items-center gap-1.5";
+    loadRules();
+  } else if (tab === "history") {
     viewHistory.classList.remove("hidden");
     btnHistory.className = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all flex items-center gap-1.5";
-    btnOrganizer.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all";
     loadHistory();
   }
 }
@@ -111,7 +126,10 @@ function selectFolder(type) {
     currentTargetFolder = defaultFolders.downloads || "";
   }
 
-  // Ocultar planes anteriores para obligar nuevo escaneo
+  hideAllStates();
+}
+
+function onShortcutsToggleChange() {
   hideAllStates();
 }
 
@@ -160,11 +178,7 @@ function showEmpty() {
   document.getElementById("state-empty").classList.remove("hidden");
 }
 
-function onShortcutsToggleChange() {
-  hideAllStates();
-}
-
-// 6. Proceso Principal: Escaneo + Plan de IA (Dry-Run)
+// 6. Proceso Principal: Escaneo + Plan de IA y Reglas (Dry-Run)
 async function startScanAndPlan() {
   showLoading("Escaneando archivos...", "Revisando elementos y aplicando guardas de seguridad.");
 
@@ -195,10 +209,10 @@ async function startScanAndPlan() {
       return;
     }
 
-    // Paso B: Generar Plan con el Motor seleccionado
+    // Paso B: Generar Plan
     showLoading(
-      "Consultando al Asistente de IA...",
-      `Analizando ${scannedFiles.length} archivos para sugerir las mejores carpetas.`
+      "Analizando archivos...",
+      `Evaluando ${scannedFiles.length} archivos con tus Reglas Personalizadas y el motor de IA.`
     );
 
     const provider = document.getElementById("select-ai-provider").value;
@@ -251,17 +265,23 @@ function renderPlanTable() {
     // Icono contextual
     let fileIcon = "📄";
     const nameLower = item.original_name.toLowerCase();
+    const isCustomRule = item.reason.includes("⭐");
+
     if (nameLower.endsWith(".lnk") || nameLower.endsWith(".url")) {
       if (item.suggested_folder.includes("Juegos")) fileIcon = "🎮";
       else if (item.suggested_folder.includes("Desarrollo")) fileIcon = "💻";
-      else if (item.suggested_folder.includes("Diseño")) fileIcon = "🎨";
+      else if (item.suggested_folder.includes("Diseno") || item.suggested_folder.includes("Diseño")) fileIcon = "🎨";
       else if (item.suggested_folder.includes("Navegadores")) fileIcon = "🌐";
       else if (item.suggested_folder.includes("Multimedia")) fileIcon = "🎧";
       else fileIcon = "🔗";
+    } else if (nameLower.endsWith(".stl") || nameLower.endsWith(".gcode") || nameLower.endsWith(".3mf")) {
+      fileIcon = "🖨️";
     } else if (nameLower.endsWith(".exe")) {
       fileIcon = "⚙️";
     } else if (nameLower.endsWith(".pdf")) {
       fileIcon = "📕";
+    } else if (isCustomRule) {
+      fileIcon = "⭐";
     }
 
     tr.innerHTML = `
@@ -279,15 +299,15 @@ function renderPlanTable() {
       </td>
       <td class="py-3 px-4">
         <div class="flex items-center gap-1.5">
-          <span class="text-xs text-brand-400">📁</span>
+          <span class="text-xs ${isCustomRule ? 'text-amber-400' : 'text-brand-400'}">📁</span>
           <input type="text" value="${item.suggested_folder}" 
                  onchange="updateSuggestedFolder(${index}, this.value)"
-                 class="bg-gray-800/80 border border-gray-700 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-brand-500 w-48 sm:w-64" />
+                 class="bg-gray-800/80 border ${isCustomRule ? 'border-amber-500/50 text-amber-200' : 'border-gray-700 text-white'} rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-brand-500 w-48 sm:w-64" />
         </div>
       </td>
       <td class="py-3 px-4">
-        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-800 border border-gray-700 text-[11px] text-gray-300">
-          💡 ${item.reason}
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md ${isCustomRule ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30 font-semibold' : 'bg-gray-800 border border-gray-700 text-gray-300'} text-[11px]">
+          ${isCustomRule ? item.reason : '💡 ' + item.reason}
         </span>
       </td>
       <td class="py-3 px-4 text-right font-mono text-[11px] text-gray-400">
@@ -343,7 +363,7 @@ async function executeCurrentPlan() {
   );
   if (!confirmed) return;
 
-  showLoading("Organizando tus archivos...", "Moviendo elementos a sus nuevas carpetas con seguridad.");
+  showLoading("Organizando tus archivos...", "Moviendo elementos a sus carpetas de destino.");
 
   try {
     const res = await fetch("/api/execute", {
@@ -374,7 +394,6 @@ async function executeCurrentPlan() {
       );
     }
 
-    // Actualizar historial y volver a escanear
     await loadHistory();
     await startScanAndPlan();
 
@@ -383,7 +402,153 @@ async function executeCurrentPlan() {
   }
 }
 
-// 9. Historial y Rollback (Undo)
+// 9. Gestión de Reglas Personalizadas (V1.1)
+async function loadRules() {
+  try {
+    const res = await fetch("/api/rules");
+    if (!res.ok) return;
+    currentRules = await res.json();
+    
+    const badge = document.getElementById("rules-badge");
+    if (badge) {
+      badge.innerText = currentRules.length;
+    }
+    renderRulesList();
+  } catch (err) {
+    console.error("Error al cargar reglas:", err);
+  }
+}
+
+function renderRulesList() {
+  const container = document.getElementById("rules-list");
+  const empty = document.getElementById("rules-empty");
+  if (!container) return;
+  container.innerHTML = "";
+
+  if (currentRules.length === 0) {
+    if (empty) empty.classList.remove("hidden");
+    return;
+  }
+  if (empty) empty.classList.add("hidden");
+
+  currentRules.forEach((rule) => {
+    const card = document.createElement("div");
+    card.className = "bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-lg space-y-3";
+    
+    card.innerHTML = `
+      <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-sm">⭐</span>
+          <h4 class="text-sm font-bold text-white">${rule.name}</h4>
+          <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${rule.enabled ? 'bg-emerald-500/20 text-emerald-300' : 'bg-gray-700 text-gray-400'}">
+            ${rule.enabled ? 'Activa' : 'Pausada'}
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" class="p-1.5 rounded-lg text-xs ${rule.enabled ? 'text-amber-400 hover:bg-amber-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}" title="${rule.enabled ? 'Pausar regla' : 'Activar regla'}" onclick="toggleCustomRule('${rule.id}')">
+            ${rule.enabled ? '⏸' : '▶'}
+          </button>
+          <button type="button" class="p-1.5 rounded-lg text-xs text-rose-400 hover:bg-rose-500/10" title="Eliminar regla" onclick="deleteCustomRule('${rule.id}')">
+            🗑
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div>
+          <span class="text-gray-400 text-[11px] block">Patrones (${rule.pattern_type === 'extension' ? 'Extensiones' : 'Palabras clave'}):</span>
+          <div class="flex flex-wrap gap-1 mt-1">
+            ${rule.patterns.map(p => `<span class="bg-gray-800 border border-gray-700 px-2 py-0.5 rounded font-mono text-[11px] text-brand-300">${p}</span>`).join('')}
+          </div>
+        </div>
+        <div>
+          <span class="text-gray-400 text-[11px] block">Destino de la regla:</span>
+          <span class="font-mono text-white text-[11px] bg-gray-800/60 px-2 py-1 rounded block truncate mt-0.5 border border-gray-700/60">
+            📁 ${rule.destination_path}
+          </span>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function toggleNewRuleModal(show) {
+  const card = document.getElementById("new-rule-card");
+  if (card) {
+    card.classList.toggle("hidden", !show);
+  }
+}
+
+function setQuickDest(path) {
+  const input = document.getElementById("rule-input-dest");
+  if (input) input.value = path;
+}
+
+async function saveNewRule() {
+  const name = document.getElementById("rule-input-name").value.trim();
+  const type = document.getElementById("rule-input-type").value;
+  const rawPatterns = document.getElementById("rule-input-patterns").value;
+  const dest = document.getElementById("rule-input-dest").value.trim();
+
+  if (!name || !rawPatterns || !dest) {
+    showToast("Faltan datos", "Completa el nombre, patrones y carpeta de destino.", "warning");
+    return;
+  }
+
+  const patterns = rawPatterns.split(",").map(p => p.trim()).filter(Boolean);
+
+  try {
+    const res = await fetch("/api/rules", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: name,
+        pattern_type: type,
+        patterns: patterns,
+        destination_path: dest,
+        enabled: true
+      })
+    });
+
+    if (!res.ok) throw new Error("Error al guardar regla");
+    showToast("Regla creada", `Se guardó la regla "${name}" con éxito.`);
+    toggleNewRuleModal(false);
+    
+    // Limpiar campos
+    document.getElementById("rule-input-name").value = "";
+    document.getElementById("rule-input-patterns").value = "";
+    document.getElementById("rule-input-dest").value = "";
+
+    await loadRules();
+  } catch (err) {
+    showToast("Error", err.message, "error");
+  }
+}
+
+async function deleteCustomRule(ruleId) {
+  if (!confirm("¿Deseas eliminar esta regla personalizada?")) return;
+  try {
+    const res = await fetch(`/api/rules/${ruleId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("No se pudo eliminar la regla");
+    showToast("Regla eliminada", "La regla fue quitada con éxito.");
+    await loadRules();
+  } catch (err) {
+    showToast("Error", err.message, "error");
+  }
+}
+
+async function toggleCustomRule(ruleId) {
+  try {
+    const res = await fetch(`/api/rules/${ruleId}/toggle`, { method: "POST" });
+    if (!res.ok) throw new Error("No se pudo cambiar estado");
+    await loadRules();
+  } catch (err) {
+    showToast("Error", err.message, "error");
+  }
+}
+
+// 10. Historial y Rollback (Undo)
 async function loadHistory() {
   try {
     const res = await fetch("/api/history");
@@ -476,7 +641,7 @@ async function triggerRollback(txId) {
   }
 }
 
-// 10. Sistema de Toast Notifications
+// 11. Sistema de Toast Notifications
 function showToast(title, message, type = "success") {
   const toast = document.getElementById("toast");
   const tTitle = document.getElementById("toast-title");

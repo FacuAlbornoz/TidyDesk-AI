@@ -5,6 +5,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DATA_DIR = BASE_DIR / "data"
 HISTORY_FILE = DATA_DIR / "history.json"
+RULES_FILE = DATA_DIR / "rules.json"
 FRONTEND_DIR = BASE_DIR / "frontend"
 
 # Crear directorio de datos si no existe

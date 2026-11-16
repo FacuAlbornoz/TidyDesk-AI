@@ -4,6 +4,17 @@ Todas las notas de las versiones y evoluciones del proyecto se documentan en est
 
 ---
 
+## [v1.1.0] - 2026-11-16
+### ⭐ Reglas de Destino Personalizadas & Carpetas Externas
+- **Pestaña de Reglas en UI:** Nueva pestaña dedicada en la barra superior para gestionar reglas con estados activa/pausada y eliminación.
+- **Carpetas Externas Absolutas:** Capacidad de enviar archivos a cualquier disco o carpeta del sistema (ej: `D:\Facu\Impresora 3d` o `D:\Facu\Itec`).
+- **Prioridad Máxima del Usuario:** Las reglas definidas por el usuario tienen precedencia absoluta sobre la IA y sobre reglas generales.
+- **Soporte de Extensiones y Palabras Clave:** Filtros por múltiples extensiones (`.stl, .step, .gcode, .3mf`) o palabras clave (`parcial, tp, seminario, itec`).
+- **Persistencia en `data/rules.json`:** Guardado seguro, dinámico y editable de las directivas del usuario.
+- **Visualización en Dry-Run:** Badges dorados `⭐ Regla Personalizada` y rutas de destino completas en la tabla interactiva de vista previa.
+
+---
+
 ## [v1.0.0] - 2026-11-16
 ### ✨ Lanzamiento Inicial
 - **Backend FastAPI:** Servidor REST con endpoints `/api/health`, `/api/scan`, `/api/plan`, `/api/execute`, `/api/history` y `/api/rollback`.
@@ -17,11 +28,6 @@ Todas las notas de las versiones y evoluciones del proyecto se documentan en est
 ---
 
 ## 🗺️ Roadmap de Próximas Versiones
-
-- **[v1.1.0] Reglas de Destino Personalizadas & Carpetas Externas (Custom Rules):**
-  - Panel visual en la UI para crear reglas propias (ej: `.stl`, `.gcode` $\rightarrow$ `D:\Facu\Impresora 3d`).
-  - Capacidad de mover archivos fuera de Descargas a cualquier disco o ruta del sistema.
-  - Persistencia de reglas en `config.json`.
 
 - **[v1.2.0] Detector de Duplicados & Limpiador Inteligente:**
   - Comparación de hashes SHA-256 para detectar descargas repetidas (`archivo (1).pdf`).

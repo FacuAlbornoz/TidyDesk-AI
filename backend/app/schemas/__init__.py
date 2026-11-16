@@ -9,6 +9,7 @@ from .organize import (
     RollbackResponse,
     TransactionRecord,
 )
+from .rules import CustomRule, CustomRuleCreate
 
 __all__ = [
     "FileItem",
@@ -22,4 +23,6 @@ __all__ = [
     "RollbackRequest",
     "RollbackResponse",
     "TransactionRecord",
+    "CustomRule",
+    "CustomRuleCreate",
 ]

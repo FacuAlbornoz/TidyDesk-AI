@@ -23,9 +23,16 @@ def sanitize_filename(filename: str) -> str:
 
 def resolve_destination_dir(target_folder: Path, suggested_folder: str) -> Path:
     """Limpia los segmentos de ruta dividiendo por barras y eliminando espacios iniciales o finales.
-    Esto previene el error [WinError 123] de Windows cuando una carpeta termina con un espacio ('Facultad / Estudio').
+    Soporta rutas absolutas externas (ej: 'D:\Facu\Impresora 3d') y relativas.
     """
-    clean_parts = [part.strip() for part in re.split(r"[/\\]+", suggested_folder) if part.strip()]
+    raw_folder = suggested_folder.strip()
+    
+    # Comprobar si es una ruta absoluta en Windows (ej: D:\... o C:\...)
+    path_obj = Path(raw_folder)
+    if path_obj.is_absolute():
+        return path_obj
+
+    clean_parts = [part.strip() for part in re.split(r"[/\\]+", raw_folder) if part.strip()]
     if not clean_parts:
         return target_folder / "Varios"
     # Sanitizar cada segmento

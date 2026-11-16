@@ -13,6 +13,15 @@ class SmartRulesProvider(AIProvider):
 
     def _classify_file(self, name: str, ext: str) -> tuple[str, str]:
         """Determina la carpeta y razón basándose en extensión y patrones de nombre."""
+        from app.core.rules_manager import match_custom_rule
+
+        # ==========================================
+        # 0. PRIORIDAD MÁXIMA: REGLAS PERSONALIZADAS DEL USUARIO
+        # ==========================================
+        custom_match = match_custom_rule(name, ext)
+        if custom_match:
+            return custom_match
+
         ext = ext.lower()
         name_lower = name.lower()
 
