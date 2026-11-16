@@ -4,6 +4,20 @@ Todas las notas de las versiones y evoluciones del proyecto se documentan en est
 
 ---
 
+## [v2.0.0] - 2026-11-16
+### 🖥️ Aplicación de Escritorio Nativa (.exe & System Tray)
+- **Controlador de Bandeja del Sistema (`backend/tray_app.py`):** Integración nativa con la bandeja del sistema de Windows (al lado del reloj) mediante `pystray`.
+- **Iconografía Dinámica de Estado:** Generación vectorial de icono con indicador luminoso que cambia a verde esmeralda cuando el **Modo Guardián** está activo.
+- **Menú Contextual Rápido (Clic Derecho en Tray):**
+  - `🗂️ Abrir Panel TidyDesk AI` (también al hacer doble clic en el icono).
+  - `🛡️ Modo Guardián (Tiempo Real)` (activar/pausar directamente sin abrir el navegador).
+  - `📥 Abrir Carpeta Descargas` y `🖥️ Abrir Carpeta Escritorio`.
+  - `❌ Salir de TidyDesk AI` (apagado limpio del servidor y del demonio Watchdog).
+- **Ejecución Silenciosa Sin Consola (`iniciar_tidydesk_tray.vbs`):** Lanzador nativo de Windows que ejecuta TidyDesk AI en segundo plano sin dejar ninguna ventana negra de terminal abierta.
+- **Compilador One-Click a `.exe` (`compilar_exe.bat`):** Script automatizado con `PyInstaller` (`--onefile --noconsole`) y soporte híbrido de rutas (`sys._MEIPASS`) en `config.py` para distribuir un único archivo `TidyDesk_AI.exe` 100% portable.
+
+---
+
 ## [v1.4.0] - 2026-11-16
 ### 🛡️ Modo Guardián en Segundo Plano (Watchdog Daemon)
 - **Servicio Watchdog en Tiempo Real:** Monitoreo continuo y no bloqueante de la carpeta de **Descargas** o **Escritorio** mediante hilos demonios con `watchdog`.
@@ -26,7 +40,7 @@ Todas las notas de las versiones y evoluciones del proyecto se documentan en est
 - **Badges Visuales de Renombrado:** Indicadores destacados `✨ Renombrado por IA` para que el usuario identifique al instante qué archivos tienen sugerencia de nuevo nombre.
 - **Interruptor de Control en Panel:** Switch interactivo en el Paso 1 para activar o desactivar el renombrado multimodal a demanda.
 - **Preservación Segura de Extensiones & Rollback:** Sanitización para evitar pérdida accidental de extensiones y compatibilidad total con el historial de reversión atómica de 1 clic.
-- **Archivo `requirements.txt`:** Definición estandarizada de dependencias (`fastapi`, `uvicorn`, `pydantic`, `httpx`, `pillow`, `pypdf`, `watchdog`) para máxima portabilidad entre computadoras.
+- **Archivo `requirements.txt`:** Definición estandarizada de dependencias (`fastapi`, `uvicorn`, `pydantic`, `httpx`, `pillow`, `pypdf`, `watchdog`, `pystray`) para máxima portabilidad entre computadoras.
 
 ---
 
@@ -61,10 +75,3 @@ Todas las notas de las versiones y evoluciones del proyecto se documentan en est
 - **Dry-Run & Rollback:** Vista previa interactiva con confirmación previa y registro de transacciones atómicas para deshacer cualquier movimiento con un solo clic.
 - **Dashboard Web:** Interfaz moderna en modo oscuro construida con TailwindCSS y los 4 estados de UI (Loading, Empty, Error, Success).
 - **Lanzador para Windows:** Archivo `iniciar_tidydesk.bat` listo para doble clic.
-
----
-
-## 🗺️ Roadmap de Próximas Versiones
-
-- **[v2.0.0] Aplicación de Escritorio Nativa (.exe & System Tray):**
-  - Empaquetado ejecutable e icono en la bandeja del sistema (System Tray) al lado del reloj de Windows para controlar TidyDesk AI sin tener una consola abierta.

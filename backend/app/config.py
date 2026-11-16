@@ -1,12 +1,19 @@
 from pathlib import Path
 import os
+import sys
 
-# Rutas del Proyecto
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+# Soporte híbrido: Ejecución desde código fuente vs Ejecutable compilado (.exe con PyInstaller)
+if getattr(sys, "frozen", False):
+    BUNDLE_DIR = Path(getattr(sys, "_MEIPASS", Path(sys.executable).resolve().parent))
+    BASE_DIR = Path(sys.executable).resolve().parent
+    FRONTEND_DIR = BUNDLE_DIR / "frontend"
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent.parent
+    FRONTEND_DIR = BASE_DIR / "frontend"
+
 DATA_DIR = BASE_DIR / "data"
 HISTORY_FILE = DATA_DIR / "history.json"
 RULES_FILE = DATA_DIR / "rules.json"
-FRONTEND_DIR = BASE_DIR / "frontend"
 
 # Crear directorio de datos si no existe
 try:
@@ -14,12 +21,12 @@ try:
 except Exception:
     pass
 
-# Rutas estándar del usuario en Windows
+# Rutas estándar del usuario en Windows (100% portables en cualquier PC)
 USER_PROFILE = Path(os.environ.get("USERPROFILE", Path.home()))
 DESKTOP_DIR = USER_PROFILE / "Desktop"
 DOWNLOADS_DIR = USER_PROFILE / "Downloads"
 
-# Extensiones protegidas (JAMÁS tocar ni mover)
+# Extensiones protegidas (JAMÁS tocar ni mover por defecto)
 BLACKLIST_EXTENSIONS = {
     ".lnk",    # Accesos directos de Windows
     ".url",    # Accesos directos de Internet
