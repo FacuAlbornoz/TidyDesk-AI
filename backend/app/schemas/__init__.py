@@ -10,6 +10,13 @@ from .organize import (
     TransactionRecord,
 )
 from .rules import CustomRule, CustomRuleCreate
+from .cleaner import (
+    DuplicateGroup,
+    OldInstaller,
+    AuditCleanResponse,
+    CleanActionRequest,
+    CleanActionResponse,
+)
 
 __all__ = [
     "FileItem",
@@ -25,4 +32,9 @@ __all__ = [
     "TransactionRecord",
     "CustomRule",
     "CustomRuleCreate",
+    "DuplicateGroup",
+    "OldInstaller",
+    "AuditCleanResponse",
+    "CleanActionRequest",
+    "CleanActionResponse",
 ]

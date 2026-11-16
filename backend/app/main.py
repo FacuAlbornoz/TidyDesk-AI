@@ -20,10 +20,12 @@ from app.schemas.organize import (
     RollbackResponse,
 )
 from app.schemas.rules import CustomRule, CustomRuleCreate
+from app.schemas.cleaner import AuditCleanResponse, CleanActionRequest, CleanActionResponse
 from app.core.scanner import scan_directory, resolve_target_folder
 from app.core.organizer import execute_plan, rollback_transaction
 from app.core.history import load_history
 from app.core.rules_manager import load_rules, create_rule, delete_rule, toggle_rule
+from app.core.cleaner import audit_clean_directory, execute_clean_action
 from app.ai.ollama_provider import OllamaProvider
 from app.ai.gemini_provider import GeminiProvider
 from app.ai.rules_provider import SmartRulesProvider
@@ -179,6 +181,29 @@ async def toggle_rule_status(rule_id: str):
     if not rule:
         raise HTTPException(status_code=404, detail="Regla no encontrada")
     return rule
+
+# ==========================================
+# ENDPOINTS: LIMPIEZA INTELIGENTE Y DUPLICADOS (V1.2)
+# ==========================================
+@app.post("/api/cleaner/audit", response_model=AuditCleanResponse)
+async def audit_cleaning(request: ScanRequest):
+    """Audita archivos duplicados por hash SHA-256 e instaladores antiguos."""
+    try:
+        target = resolve_target_folder(request.folder_type, request.custom_path)
+        return audit_clean_directory(target)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error en auditoría de limpieza: {str(e)}")
+
+@app.post("/api/cleaner/execute", response_model=CleanActionResponse)
+async def execute_cleaning(request: CleanActionRequest):
+    """Ejecuta la limpieza segura de duplicados o instaladores antiguos con Rollback."""
+    target_path = Path(request.target_folder).resolve()
+    if not target_path.exists():
+        raise HTTPException(status_code=404, detail="La carpeta objetivo no existe.")
+    try:
+        return execute_clean_action(target_path, request)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al ejecutar limpieza: {str(e)}")
 
 # Montar frontend para servir la aplicación web en http://localhost:8000
 if FRONTEND_DIR.exists():

@@ -76,29 +76,36 @@ async function checkHealth() {
   }
 }
 
-// 2. Navegación por Pestañas (Organizador / Reglas / Historial)
+// 2. Navegación por Pestañas (Organizador / Limpiador / Reglas / Historial)
 function switchTab(tab) {
   const viewOrganizer = document.getElementById("view-organizer");
+  const viewCleaner = document.getElementById("view-cleaner");
   const viewRules = document.getElementById("view-rules");
   const viewHistory = document.getElementById("view-history");
   
   const btnOrganizer = document.getElementById("tab-organizer-btn");
+  const btnCleaner = document.getElementById("tab-cleaner-btn");
   const btnRules = document.getElementById("tab-rules-btn");
   const btnHistory = document.getElementById("tab-history-btn");
 
   // Ocultar todas las vistas
   viewOrganizer.classList.add("hidden");
+  if (viewCleaner) viewCleaner.classList.add("hidden");
   viewRules.classList.add("hidden");
   viewHistory.classList.add("hidden");
 
   // Estilos inactivos
   btnOrganizer.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all";
+  if (btnCleaner) btnCleaner.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5";
   btnRules.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5";
   btnHistory.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5";
 
   if (tab === "organizer") {
     viewOrganizer.classList.remove("hidden");
     btnOrganizer.className = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all";
+  } else if (tab === "cleaner") {
+    if (viewCleaner) viewCleaner.classList.remove("hidden");
+    if (btnCleaner) btnCleaner.className = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all flex items-center gap-1.5";
   } else if (tab === "rules") {
     viewRules.classList.remove("hidden");
     btnRules.className = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all flex items-center gap-1.5";
@@ -671,4 +678,177 @@ function showToast(title, message, type = "success") {
     toast.classList.add("translate-y-20", "opacity-0");
     toast.classList.remove("translate-y-0", "opacity-100");
   }, 4000);
+}
+
+// ==========================================
+// 12. LIMPIADOR INTELIGENTE & DUPLICADOS (V1.2)
+// ==========================================
+let cleanerAuditData = null;
+let selectedCleanerIds = new Set();
+
+async function startCleanerAudit() {
+  const btn = document.getElementById("btn-audit-cleaner");
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="animate-spin inline-block mr-1">🌀</span> Auditando...`;
+
+  try {
+    const res = await fetch("/api/cleaner/audit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ folder_type: currentFolderType }),
+    });
+
+    if (!res.ok) throw new Error("Fallo en la auditoría de limpieza");
+    cleanerAuditData = await res.json();
+    renderCleanerResults();
+    showToast(
+      "Auditoría Completa",
+      `Se encontraron ${cleanerAuditData.total_duplicates_count} duplicados y ${cleanerAuditData.old_installers.length} instaladores antiguos.`
+    );
+  } catch (err) {
+    showToast("Error en Limpiador", err.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
+}
+
+function renderCleanerResults() {
+  if (!cleanerAuditData) return;
+
+  selectedCleanerIds.clear();
+
+  // Actualizar Métricas
+  document.getElementById("cleaner-metrics").classList.remove("hidden");
+  document.getElementById("cleaner-empty").classList.add("hidden");
+  document.getElementById("cleaner-results").classList.remove("hidden");
+  document.getElementById("cleaner-action-bar").classList.remove("hidden");
+
+  document.getElementById("metric-recoverable-space").innerText = cleanerAuditData.total_recoverable_formatted;
+  document.getElementById("metric-duplicates-count").innerText = cleanerAuditData.total_duplicates_count;
+  document.getElementById("metric-duplicates-waste").innerText = `Desperdicio: ${cleanerAuditData.duplicates_waste_formatted}`;
+  document.getElementById("metric-installers-count").innerText = cleanerAuditData.old_installers.length;
+  document.getElementById("metric-installers-waste").innerText = `Ocupación: ${cleanerAuditData.total_old_installers_formatted}`;
+
+  // Renderizar Duplicados
+  const dupContainer = document.getElementById("cleaner-duplicates-list");
+  dupContainer.innerHTML = "";
+  if (cleanerAuditData.duplicate_groups.length === 0) {
+    dupContainer.innerHTML = `<div class="p-4 rounded-xl bg-gray-900 border border-gray-800 text-xs text-emerald-400">✨ No se detectaron archivos duplicados idénticos por SHA-256.</div>`;
+  } else {
+    cleanerAuditData.duplicate_groups.forEach((group) => {
+      const div = document.createElement("div");
+      div.className = "bg-gray-900/90 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-2";
+      
+      // Marcar duplicados por defecto
+      group.duplicates.forEach(d => selectedCleanerIds.add(d.id));
+
+      div.innerHTML = `
+        <div class="flex items-center justify-between text-xs border-b border-gray-800 pb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-bold">📄 Original:</span>
+            <span class="text-white font-medium">${group.original.name}</span>
+          </div>
+          <span class="font-mono text-gray-400">${group.size_formatted}</span>
+        </div>
+        <div class="space-y-1.5 pt-1">
+          <span class="text-[11px] text-amber-400 font-semibold">Copias repetidas detectadas (${group.duplicates.length}):</span>
+          <div class="space-y-1">
+            ${group.duplicates.map(d => `
+              <label class="flex items-center justify-between p-2 rounded-lg bg-gray-800/60 hover:bg-gray-800 border border-gray-700/60 text-xs cursor-pointer">
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" checked onchange="toggleCleanerItem('${d.id}', this.checked)" class="rounded bg-gray-700 border-gray-600 text-rose-600 focus:ring-0 cursor-pointer" />
+                  <span class="text-gray-300">${d.name}</span>
+                </div>
+                <span class="text-[10px] text-rose-300 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">Duplicado</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      dupContainer.appendChild(div);
+    });
+  }
+
+  // Renderizar Instaladores Antiguos
+  const instContainer = document.getElementById("cleaner-installers-list");
+  instContainer.innerHTML = "";
+  if (cleanerAuditData.old_installers.length === 0) {
+    instContainer.innerHTML = `<div class="p-4 rounded-xl bg-gray-900 border border-gray-800 text-xs text-emerald-400 col-span-2">✨ No hay instaladores viejos huérfanos (>30 días).</div>`;
+  } else {
+    cleanerAuditData.old_installers.forEach((item) => {
+      const div = document.createElement("div");
+      div.className = "bg-gray-900/90 border border-gray-800 rounded-2xl p-4 shadow-lg flex items-center justify-between text-xs";
+      
+      div.innerHTML = `
+        <div class="flex items-center gap-2.5">
+          <input type="checkbox" onchange="toggleCleanerItem('${item.file.id}', this.checked)" class="rounded bg-gray-700 border-gray-600 text-amber-600 focus:ring-0 cursor-pointer" />
+          <div>
+            <p class="font-medium text-white truncate max-w-xs">${item.file.name}</p>
+            <p class="text-[10px] text-gray-500">Modificado hace ${item.days_old} días</p>
+          </div>
+        </div>
+        <span class="font-mono text-gray-300">${item.file.size_formatted}</span>
+      `;
+      instContainer.appendChild(div);
+    });
+  }
+
+  updateCleanerSelectedCount();
+}
+
+function toggleCleanerItem(id, checked) {
+  if (checked) {
+    selectedCleanerIds.add(id);
+  } else {
+    selectedCleanerIds.delete(id);
+  }
+  updateCleanerSelectedCount();
+}
+
+function updateCleanerSelectedCount() {
+  const el = document.getElementById("cleaner-selected-count");
+  if (el) el.innerText = selectedCleanerIds.size;
+  const btn = document.getElementById("btn-execute-clean");
+  if (btn) {
+    btn.disabled = selectedCleanerIds.size === 0;
+    btn.style.opacity = selectedCleanerIds.size === 0 ? "0.5" : "1";
+  }
+}
+
+async function executeCleanerAction() {
+  if (selectedCleanerIds.size === 0) return;
+
+  const confirmed = confirm(
+    `¿Limpiar ${selectedCleanerIds.size} archivos seleccionados?\n\nSe moverán de forma segura a la subcarpeta '_Limpieza_TidyDesk' y podrás recuperarlos en cualquier momento desde Historial.`
+  );
+  if (!confirmed) return;
+
+  showLoading("Limpiando archivos...", "Moviendo duplicados e instaladores seleccionados de forma segura.");
+
+  try {
+    const res = await fetch("/api/cleaner/execute", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        target_folder: currentTargetFolder,
+        file_ids_to_clean: Array.from(selectedCleanerIds),
+        destination_action: "archive",
+      }),
+    });
+
+    if (!res.ok) throw new Error("Fallo al ejecutar limpieza");
+    const data = await res.json();
+
+    showToast(
+      "Limpieza Exitosa",
+      `Se limpiaron ${data.cleaned_count} archivos, recuperando ${data.freed_space_formatted}. Guardado para Rollback.`
+    );
+
+    await loadHistory();
+    await startCleanerAudit();
+  } catch (err) {
+    showError("Fallo en limpieza", err.message);
+  }
 }

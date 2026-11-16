@@ -64,7 +64,7 @@
         <div>
           <span class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
             TidyDesk <span class="text-brand-400 font-extrabold">AI</span>
-            <span class="text-[10px] bg-brand-500/20 text-brand-300 font-semibold px-2 py-0.5 rounded-full border border-brand-500/30">v1.1</span>
+            <span class="text-[10px] bg-brand-500/20 text-brand-300 font-semibold px-2 py-0.5 rounded-full border border-brand-500/30">v1.2</span>
           </span>
           <span class="text-xs text-gray-400 hidden sm:block">Organizador Inteligente y Seguro de Archivos</span>
         </div>
@@ -78,9 +78,12 @@
           <button id="tab-organizer-btn" class="px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all" onclick="switchTab('organizer')">
             Organizador
           </button>
+          <button id="tab-cleaner-btn" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5" onclick="switchTab('cleaner')">
+            <span>🧹 Limpiador</span>
+          </button>
           <button id="tab-rules-btn" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5" onclick="switchTab('rules')">
             <span>⭐ Reglas</span>
-            <span id="rules-badge" class="bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded-full text-[10px]">2</span>
+            <span id="rules-badge" class="bg-indigo-500/20 text-indigo-300 px-1.5 py-0.2 rounded-full text-[10px]">0</span>
           </button>
           <button id="tab-history-btn" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5" onclick="switchTab('history')">
             <span>Historial (Undo)</span>
@@ -282,7 +285,83 @@
 
     </div>
 
-    <!-- PESTAÑA 2: REGLAS PERSONALIZADAS (V1.1) -->
+    <!-- PESTAÑA 2: LIMPIADOR INTELIGENTE (V1.2) -->
+    <div id="view-cleaner" class="hidden space-y-6">
+      
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <span>🧹 Limpiador Inteligente & Duplicados</span>
+            <span class="text-[10px] font-bold bg-brand-500/20 text-brand-300 px-2.5 py-0.5 rounded-full border border-brand-500/30">V1.2</span>
+          </h2>
+          <p class="text-xs text-gray-400 mt-0.5 max-w-2xl">
+            Detecta archivos duplicados idénticos bit a bit mediante hash criptográfico SHA-256 e instaladores antiguos que consumen espacio.
+          </p>
+        </div>
+        <button type="button" id="btn-audit-cleaner" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-brand-600/30" onclick="startCleanerAudit()">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+          <span>Auditar Duplicados e Instaladores</span>
+        </button>
+      </div>
+
+      <!-- Métricas Resumen -->
+      <div id="cleaner-metrics" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-4 shadow-lg">
+          <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Espacio Recuperable</p>
+          <p class="text-2xl font-black text-emerald-400 mt-1" id="metric-recoverable-space">0 MB</p>
+          <p class="text-[10px] text-gray-500 mt-0.5">Sumando duplicados e instaladores</p>
+        </div>
+        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-4 shadow-lg">
+          <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Copias Duplicadas</p>
+          <p class="text-2xl font-black text-amber-400 mt-1" id="metric-duplicates-count">0</p>
+          <p class="text-[10px] text-gray-500 mt-0.5" id="metric-duplicates-waste">Desperdicio: 0 MB</p>
+        </div>
+        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-4 shadow-lg">
+          <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Instaladores Antiguos (>30d)</p>
+          <p class="text-2xl font-black text-indigo-400 mt-1" id="metric-installers-count">0</p>
+          <p class="text-[10px] text-gray-500 mt-0.5" id="metric-installers-waste">Ocupación: 0 MB</p>
+        </div>
+      </div>
+
+      <!-- Barra de Acción de Limpieza -->
+      <div id="cleaner-action-bar" class="hidden flex items-center justify-between bg-gray-900/90 p-4 rounded-2xl border border-gray-800 shadow-xl">
+        <div class="text-xs text-gray-300">
+          <span id="cleaner-selected-count" class="font-bold text-white">0</span> elementos marcados para limpiar
+        </div>
+        <button type="button" id="btn-execute-clean" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white text-xs font-bold transition-all shadow-lg shadow-rose-600/20 flex items-center gap-2" onclick="executeCleanerAction()">
+          <span>🧹 Limpiar y Archivar con Rollback</span>
+        </button>
+      </div>
+
+      <!-- Secciones de Resultados -->
+      <div id="cleaner-results" class="hidden space-y-6">
+        
+        <!-- Duplicados -->
+        <div id="cleaner-duplicates-section" class="space-y-3">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>👥 Archivos Duplicados Idénticos (Hash SHA-256)</span>
+          </h3>
+          <div id="cleaner-duplicates-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Instaladores Viejos -->
+        <div id="cleaner-installers-section" class="space-y-3">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>📦 Instaladores Antiguos (>30 días)</span>
+          </h3>
+          <div id="cleaner-installers-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+        </div>
+
+      </div>
+
+      <div id="cleaner-empty" class="py-16 text-center text-gray-500 space-y-2">
+        <span class="text-3xl block">🔍</span>
+        <p class="text-sm">Hacé clic en "Auditar Duplicados e Instaladores" para analizar tu carpeta.</p>
+      </div>
+
+    </div>
+
+    <!-- PESTAÑA 3: REGLAS PERSONALIZADAS (V1.1) -->
     <div id="view-rules" class="hidden space-y-6">
       
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -354,7 +433,7 @@
 
     </div>
 
-    <!-- PESTAÑA 3: HISTORIAL Y ROLLBACK -->
+    <!-- PESTAÑA 4: HISTORIAL Y ROLLBACK -->
     <div id="view-history" class="hidden space-y-6">
       
       <div class="flex items-center justify-between">

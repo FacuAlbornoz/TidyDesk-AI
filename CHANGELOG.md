@@ -4,6 +4,17 @@ Todas las notas de las versiones y evoluciones del proyecto se documentan en est
 
 ---
 
+## [v1.2.0] - 2026-11-16
+### 🧹 Detector de Duplicados (SHA-256) & Limpiador Inteligente
+- **Pestaña 'Limpiador' en UI:** Nueva vista integrada para auditar duplicados de almacenamiento e instaladores antiguos.
+- **Fingerprint Criptográfico SHA-256:** Detección de duplicados exactos mediante hash SHA-256, optimizado previamente agrupando por tamaño de bytes para evitar lecturas innecesarias en disco.
+- **Identificación Inteligente de Original vs. Duplicado:** Distingue el archivo original (nombre más canónico/corto) de sus copias redundantes (ej: rchivo (1).pdf o rchivo - copia.pdf).
+- **Detección de Instaladores Antiguos:** Identifica instaladores pesados (.exe, .msi) descargados hace más de 30 días que consumen almacenamiento residual.
+- **Limpieza Segura con Rollback:** Los archivos seleccionados no se eliminan permanentemente; se trasladan a una carpeta de cuarentena segura _Limpieza_TidyDesk y generan un registro de transacción con Rollback atómico de 1 clic.
+- **Métricas de Espacio Recuperable:** Tarjetas visuales de cálculo instantáneo de MB/GB desperdiciados y espacio total recuperable.
+
+---
+
 ## [v1.1.0] - 2026-11-16
 ### ⭐ Reglas de Destino Personalizadas & Carpetas Externas
 - **Pestaña de Reglas en UI:** Nueva pestaña dedicada en la barra superior para gestionar reglas con estados activa/pausada y eliminación.
