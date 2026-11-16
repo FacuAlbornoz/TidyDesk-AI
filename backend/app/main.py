@@ -26,6 +26,7 @@ from app.core.organizer import execute_plan, rollback_transaction
 from app.core.history import load_history
 from app.core.rules_manager import load_rules, create_rule, delete_rule, toggle_rule
 from app.core.cleaner import audit_clean_directory, execute_clean_action
+from app.core.multimodal import apply_multimodal_renaming
 from app.ai.ollama_provider import OllamaProvider
 from app.ai.gemini_provider import GeminiProvider
 from app.ai.rules_provider import SmartRulesProvider
@@ -117,6 +118,13 @@ async def create_organization_plan(request: PlanRequest):
 
     try:
         items = await provider.generate_plan(request.files, model=model_used)
+        if request.enable_smart_rename:
+            items = await apply_multimodal_renaming(
+                items,
+                provider=provider_name,
+                model=model_used,
+                api_key=request.api_key
+            )
         return PlanResponse(
             provider_used=provider_name,
             model_used=model_used,

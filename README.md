@@ -44,7 +44,7 @@ Puedes consultar el detalle completo de cada versión en **[CHANGELOG.md](CHANGE
 * **[v1.0.0]** ✅ Lanzamiento base con IA Dual, Modo Accesos Directos, Dry-Run y Rollback.
 * **[v1.1.0]** ✅ Reglas Personalizadas y Carpetas Externas (ej: `.stl` a `Impresora 3d`, facultad a `Itec`).
 * **[v1.2.0]** ✅ Detector de duplicados por hash SHA-256 y limpiador de instaladores viejos.
-* **[v1.3.0]** ⏳ Renombrado por visión y lectura de contenido de PDFs/imágenes.
+* **[v1.3.0]** ✅ Renombrado inteligente con IA multimodal (visión en imágenes y lectura de PDFs).
 * **[v1.4.0]** ⏳ Modo Guardián en segundo plano (Watchdog) con notificaciones nativas de Windows.
 * **[v2.0.0]** ⏳ App nativa empaquetada en `.exe` con icono en la bandeja del sistema (System Tray).
 
@@ -60,6 +60,7 @@ Puedes consultar el detalle completo de cada versión en **[CHANGELOG.md](CHANGE
 │   │   ├── core/
 │   │   │   ├── scanner.py       # Auditoría segura de archivos
 │   │   │   ├── cleaner.py       # Detección SHA-256 y limpieza segura
+│   │   │   ├── multimodal.py    # Renombrado inteligente con visión y lectura PDF
 │   │   │   ├── organizer.py     # Movimiento atómico y resolución de colisiones
 │   │   │   └── history.py       # Bitácora de transacciones para rollback
 │   │   ├── ai/

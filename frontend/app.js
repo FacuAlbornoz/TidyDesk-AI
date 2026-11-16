@@ -225,6 +225,7 @@ async function startScanAndPlan() {
     const provider = document.getElementById("select-ai-provider").value;
     const model = provider === "ollama" ? document.getElementById("select-ollama-model").value : null;
     const apiKey = provider === "gemini" ? document.getElementById("input-gemini-key").value : null;
+    const enableSmartRename = document.getElementById("toggle-smart-rename")?.checked ?? true;
 
     const planRes = await fetch("/api/plan", {
       method: "POST",
@@ -235,6 +236,7 @@ async function startScanAndPlan() {
         model: model,
         api_key: apiKey,
         files: scannedFiles,
+        enable_smart_rename: enableSmartRename,
       }),
     });
 
@@ -291,6 +293,8 @@ function renderPlanTable() {
       fileIcon = "⭐";
     }
 
+    const isRenamed = item.suggested_name && item.suggested_name.toLowerCase() !== item.original_name.toLowerCase();
+
     tr.innerHTML = `
       <td class="py-3 px-4 text-center">
         <input type="checkbox" ${item.selected ? "checked" : ""} 
@@ -309,7 +313,18 @@ function renderPlanTable() {
           <span class="text-xs ${isCustomRule ? 'text-amber-400' : 'text-brand-400'}">📁</span>
           <input type="text" value="${item.suggested_folder}" 
                  onchange="updateSuggestedFolder(${index}, this.value)"
-                 class="bg-gray-800/80 border ${isCustomRule ? 'border-amber-500/50 text-amber-200' : 'border-gray-700 text-white'} rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-brand-500 w-48 sm:w-64" />
+                 class="bg-gray-800/80 border ${isCustomRule ? 'border-amber-500/50 text-amber-200' : 'border-gray-700 text-white'} rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-brand-500 w-44 sm:w-56" />
+        </div>
+      </td>
+      <td class="py-3 px-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs ${isRenamed ? 'text-purple-400' : 'text-gray-500'}">✏️</span>
+            <input type="text" value="${item.suggested_name}" 
+                   onchange="updateSuggestedName(${index}, this.value)"
+                   class="bg-gray-800/80 border ${isRenamed ? 'border-purple-500/60 text-purple-200 font-medium' : 'border-gray-700 text-gray-300'} rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-brand-500 w-48 sm:w-60" />
+          </div>
+          ${isRenamed ? '<div class="text-[10px] text-purple-300 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span> Renombrado por IA</div>' : ''}
         </div>
       </td>
       <td class="py-3 px-4">
@@ -323,6 +338,12 @@ function renderPlanTable() {
     `;
     tbody.appendChild(tr);
   });
+}
+
+function updateSuggestedName(index, newName) {
+  if (currentPlan[index]) {
+    currentPlan[index].suggested_name = newName.trim();
+  }
 }
 
 function toggleItemSelection(index, selected) {

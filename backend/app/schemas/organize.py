@@ -16,6 +16,7 @@ class PlanRequest(BaseModel):
     model: Optional[str] = Field(None, description="Nombre del modelo (ej: 'llama3', 'gemini-1.5-flash')")
     api_key: Optional[str] = Field(None, description="API Key si se utiliza Gemini")
     files: List[dict] = Field(..., description="Lista de archivos escaneados")
+    enable_smart_rename: bool = Field(True, description="Si se activa el renombrado multimodal para imágenes y PDFs")
 
 class PlanResponse(BaseModel):
     provider_used: str

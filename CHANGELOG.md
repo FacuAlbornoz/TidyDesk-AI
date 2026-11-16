@@ -4,6 +4,20 @@ Todas las notas de las versiones y evoluciones del proyecto se documentan en est
 
 ---
 
+## [v1.3.0] - 2026-11-16
+### ✨ Renombrado con IA Multimodal (Visión & Extracción de PDFs)
+- **Extracción de Contenido de PDFs:** Integración de pypdf para extraer de forma segura y liviana el texto plano de la primera página de documentos PDF genéricos (download (1).pdf, documento.pdf).
+- **Detección Heurística e IA de Entidades:** Reconocimiento de tipos de comprobante (Factura, Comprobante, Recibo, Constancia, TP), entidades emisoras (EPEC, Telecom, Mercado Pago, AFIP, Itec) y períodos (Noviembre_2026, fechas ISO).
+- **Visión Multimodal para Imágenes:** Integración con Gemini Vision y miniaturas optimizadas (PIL) para describir capturas y fotos genéricas (Screenshot (1).png -> Captura_... o descripción semántica de la pantalla).
+- **Columna de 'Nuevo Nombre' Editable en Dry-Run:** Nueva columna en la tabla de vista previa con inputs interactivos para revisar o personalizar el nuevo nombre antes de confirmar el movimiento.
+- **Badges Visuales de Renombrado:** Indicadores destacados ✨ Renombrado por IA para que el usuario identifique al instante qué archivos tienen sugerencia de nuevo nombre.
+- **Interruptor de Control en Panel:** Switch interactivo en el Paso 1 para activar o desactivar el renombrado multimodal a demanda.
+- **Preservación Segura de Extensiones & Rollback:** Sanitización para evitar pérdida accidental de extensiones y compatibilidad total con el historial de reversión atómica de 1 clic.
+- **Archivo 
+equirements.txt:** Definición estandarizada de dependencias (astapi, uvicorn, pydantic, httpx, pillow, pypdf) para máxima portabilidad entre computadoras.
+
+---
+
 ## [v1.2.0] - 2026-11-16
 ### 🧹 Detector de Duplicados (SHA-256) & Limpiador Inteligente
 - **Pestaña 'Limpiador' en UI:** Nueva vista integrada para auditar duplicados de almacenamiento e instaladores antiguos.

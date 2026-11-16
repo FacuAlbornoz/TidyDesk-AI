@@ -82,6 +82,8 @@ def execute_plan(target_folder: Path, items: List[PlanItem]) -> ExecuteResponse:
             # Limpiar nombre sugerido y resolver colisiones
             base_name = item.suggested_name.strip() or src_path.name
             clean_name = sanitize_filename(base_name)
+            if not Path(clean_name).suffix and src_path.suffix:
+                clean_name += src_path.suffix
             dest_candidate = dest_dir / clean_name
             final_dest = resolve_unique_path(dest_candidate)
 
