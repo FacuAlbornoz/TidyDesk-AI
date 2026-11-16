@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TidyDesk AI - Organizador Inteligente de Escritorio y Descargas</title>
+  
+  <!-- TailwindCSS v3 CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            dark: {
+              bg: '#0b0f19',
+              card: '#111827',
+              border: '#1f2937',
+              hover: '#1e293b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    /* Scrollbar sutil */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0b0f19; }
+    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+  </style>
+</head>
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+  <!-- ========================================== -->
+  <!-- 1. HEADER / BARRA DE NAVEGACIÓN             -->
+  <!-- ========================================== -->
+  <header class="border-b border-gray-800 bg-gray-900/60 backdrop-blur-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand & Logo -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-brand-500/20">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+        </div>
+        <div>
+          <span class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            TidyDesk <span class="text-brand-400 font-extrabold">AI</span>
+            <span class="text-[10px] bg-brand-500/20 text-brand-300 font-semibold px-2 py-0.5 rounded-full border border-brand-500/30">v1.0 Local</span>
+          </span>
+          <span class="text-xs text-gray-400 hidden sm:block">Organizador Inteligente y Seguro de Archivos</span>
+        </div>
+      </div>
+
+      <!-- Estado de Proveedores & Tabs -->
+      <div class="flex items-center gap-3 sm:gap-4">
+        
+        <!-- Pestañas de Vista -->
+        <div class="flex bg-gray-800/80 p-1 rounded-xl border border-gray-700/60 text-xs font-medium">
+          <button id="tab-organizer-btn" class="px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all" onclick="switchTab('organizer')">
+            Organizador
+          </button>
+          <button id="tab-history-btn" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5" onclick="switchTab('history')">
+            <span>Historial (Undo)</span>
+            <span id="history-badge" class="hidden bg-gray-700 text-gray-200 px-1.5 py-0.2 rounded-full text-[10px]">0</span>
+          </button>
+        </div>
+
+        <!-- Indicador de Ollama -->
+        <div id="ollama-status-pill" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-800/80 border border-gray-700 text-xs">
+          <span id="ollama-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span id="ollama-text" class="text-gray-300">Ollama: Comprobando...</span>
+        </div>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- 2. CONTENIDO PRINCIPAL                      -->
+  <!-- ========================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
+    
+    <!-- PESTAÑA 1: ORGANIZADOR DE ARCHIVOS -->
+    <div id="view-organizer" class="space-y-8">
+      
+      <!-- Panel de Control y Configuración -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- 1.1 Selector de Carpeta -->
+        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-xl space-y-4">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
+            <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+            1. Seleccionar Carpeta
+          </h2>
+          <div class="grid grid-cols-2 gap-3">
+            <button type="button" id="btn-folder-desktop" class="folder-select-btn active p-4 rounded-xl border-2 border-brand-500 bg-brand-500/10 text-left transition-all" onclick="selectFolder('desktop')">
+              <span class="text-2xl block mb-1">🖥️</span>
+              <span class="font-bold text-white block text-sm">Escritorio</span>
+              <span class="text-[11px] text-gray-400" id="path-preview-desktop">C:\Users\...\Desktop</span>
+            </button>
+            <button type="button" id="btn-folder-downloads" class="folder-select-btn p-4 rounded-xl border border-gray-800 bg-gray-800/40 text-left hover:border-gray-700 transition-all" onclick="selectFolder('downloads')">
+              <span class="text-2xl block mb-1">📥</span>
+              <span class="font-bold text-white block text-sm">Descargas</span>
+              <span class="text-[11px] text-gray-400" id="path-preview-downloads">C:\Users\...\Downloads</span>
+            </button>
+          </div>
+          <!-- Toggle para Accesos Directos (.lnk) -->
+          <div class="p-3.5 rounded-xl bg-gray-800/80 border border-gray-700 space-y-1.5">
+            <label class="flex items-center justify-between cursor-pointer">
+              <span class="text-xs font-semibold text-white flex items-center gap-2">
+                <span>🎮</span> Agrupar Accesos Directos (.lnk)
+              </span>
+              <input type="checkbox" id="toggle-include-shortcuts" class="w-4 h-4 rounded bg-gray-700 border-gray-600 text-brand-600 focus:ring-0 cursor-pointer" onchange="onShortcutsToggleChange()" />
+            </label>
+            <p class="text-[11px] text-gray-400 leading-tight">
+              Agrupa tus apps de Juegos, Programación, Diseño y Navegadores en carpetas ordenadas en tu Escritorio.
+            </p>
+          </div>
+
+          <!-- Filtro de seguridad informativo -->
+          <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 flex items-center gap-2">
+            <svg class="w-4 h-4 shrink-0 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+            <span id="safety-notice-text"><strong>Guardas activas:</strong> desktop.ini y archivos del sistema siempre protegidos.</span>
+          </div>
+        </div>
+
+        <!-- 1.2 Selector de Motor de IA -->
+        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-xl space-y-4">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
+            <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            2. Motor de Clasificación
+          </h2>
+          <div class="space-y-2">
+            <select id="select-ai-provider" class="w-full px-3.5 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" onchange="onProviderChange()">
+              <option value="ollama">🦙 Ollama Local (100% Offline y Privado)</option>
+              <option value="gemini">✨ Google Gemini API (Nube de alta velocidad)</option>
+              <option value="smart_rules">⚡ Reglas Heurísticas (Instantáneo sin IA)</option>
+            </select>
+          </div>
+
+          <!-- Configuración dinámica según proveedor -->
+          <div id="provider-config-container" class="text-xs space-y-2">
+            <!-- Selector de modelo Ollama -->
+            <div id="ollama-options" class="space-y-1">
+              <label class="text-gray-400">Modelo Ollama:</label>
+              <select id="select-ollama-model" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-xs">
+                <option value="llama3">llama3</option>
+              </select>
+            </div>
+            <!-- Campo API Key Gemini -->
+            <div id="gemini-options" class="hidden space-y-1">
+              <label class="text-gray-400">Gemini API Key:</label>
+              <input type="password" id="input-gemini-key" placeholder="AIzaSy..." class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-xs focus:ring-1 focus:ring-brand-500" onchange="saveGeminiKey()" />
+              <p class="text-[10px] text-gray-500">Se guarda de forma segura en tu navegador (localStorage).</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1.3 Botón de Escaneo y Resumen -->
+        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+          <div class="space-y-2">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-gray-400">
+              3. Auditoría y Plan
+            </h2>
+            <p class="text-xs text-gray-400 leading-relaxed">
+              Escanea la carpeta seleccionada y genera una propuesta de clasificación sin mover nada todavía.
+            </p>
+          </div>
+          <div class="pt-4 space-y-2">
+            <button type="button" id="btn-scan" class="w-full py-3 px-4 rounded-xl font-semibold text-sm text-white bg-brand-600 hover:bg-brand-500 active:scale-[0.99] shadow-lg shadow-brand-600/30 transition-all flex items-center justify-center gap-2" onclick="startScanAndPlan()">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              <span>Auditar con IA</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ESTADO: LOADING (Esqueleto / Spinner) -->
+      <div id="state-loading" class="hidden py-16 text-center space-y-4">
+        <div class="w-12 h-12 mx-auto border-4 border-brand-500/20 border-t-brand-500 rounded-full animate-spin"></div>
+        <div>
+          <h3 class="text-base font-bold text-white" id="loading-title">Escaneando archivos...</h3>
+          <p class="text-xs text-gray-400" id="loading-subtitle">Analizando contenido y consultando el plan a la IA.</p>
+        </div>
+      </div>
+
+      <!-- ESTADO: EMPTY (Carpeta ya organizada) -->
+      <div id="state-empty" class="hidden py-16 text-center space-y-3 bg-gray-900/50 rounded-2xl border border-gray-800">
+        <div class="w-16 h-16 mx-auto rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-3xl">
+          ✨
+        </div>
+        <h3 class="text-lg font-bold text-white">¡Carpeta Impecable!</h3>
+        <p class="text-xs text-gray-400 max-w-md mx-auto">
+          No se encontraron archivos sueltos para organizar en esta carpeta. Todos los elementos ya están clasificados o protegidos.
+        </p>
+      </div>
+
+      <!-- ESTADO: ERROR -->
+      <div id="state-error" class="hidden py-12 px-6 bg-rose-500/10 border border-rose-500/30 rounded-2xl text-center space-y-3">
+        <div class="w-12 h-12 mx-auto rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        </div>
+        <h3 class="text-base font-bold text-rose-300" id="error-title">Ocurrió un inconveniente</h3>
+        <p class="text-xs text-rose-200/80 max-w-lg mx-auto" id="error-message">Detalles del error.</p>
+        <button type="button" class="px-4 py-2 rounded-xl bg-gray-800 text-white text-xs font-semibold hover:bg-gray-700" onclick="startScanAndPlan()">
+          Reintentar
+        </button>
+      </div>
+
+      <!-- ESTADO: SUCCESS / DRY-RUN (Tabla de Vista Previa) -->
+      <div id="state-plan" class="hidden space-y-4">
+        
+        <!-- Header de la propuesta -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gray-900/90 p-4 sm:p-5 rounded-2xl border border-gray-800 shadow-lg">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-brand-400 animate-pulse"></span>
+              <h2 class="text-base font-bold text-white">Plan de Organización (Dry-Run)</h2>
+            </div>
+            <p class="text-xs text-gray-400 mt-0.5">
+              Revisá la propuesta de la IA. Podés editar las carpetas de destino o desmarcar lo que no quieras mover.
+            </p>
+          </div>
+          
+          <!-- Botón de Ejecutar -->
+          <div class="flex items-center gap-3 w-full sm:w-auto">
+            <span class="text-xs text-gray-400 hidden sm:inline" id="plan-selection-count">0 seleccionados</span>
+            <button type="button" id="btn-execute" class="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2" onclick="executeCurrentPlan()">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              <span>Confirmar y Organizar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabla interactiva -->
+        <div class="overflow-x-auto rounded-2xl border border-gray-800 bg-gray-900/60 shadow-xl">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-gray-800 bg-gray-800/60 text-gray-400 font-semibold uppercase tracking-wider">
+                <th class="py-3 px-4 w-12 text-center">
+                  <input type="checkbox" id="check-all" checked onchange="toggleSelectAll(this.checked)" class="rounded bg-gray-700 border-gray-600 text-brand-600 focus:ring-0 cursor-pointer" />
+                </th>
+                <th class="py-3 px-4">Archivo Original</th>
+                <th class="py-3 px-4">Carpeta Destino</th>
+                <th class="py-3 px-4">Motivo / Clasificación IA</th>
+                <th class="py-3 px-4 text-right">Tamaño</th>
+              </tr>
+            </thead>
+            <tbody id="plan-table-body" class="divide-y divide-gray-800 text-gray-300">
+              <!-- Filas dinámicas generadas con app.js -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- PESTAÑA 2: HISTORIAL Y ROLLBACK -->
+    <div id="view-history" class="hidden space-y-6">
+      
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-white">Historial de Organizaciones</h2>
+          <p class="text-xs text-gray-400">Cada lote queda registrado. Podés revertir cualquier cambio al estado anterior con un solo clic.</p>
+        </div>
+        <button type="button" class="text-xs text-brand-400 hover:text-brand-300 underline" onclick="loadHistory()">
+          Actualizar historial
+        </button>
+      </div>
+
+      <div id="history-list" class="space-y-4">
+        <!-- Tarjetas dinámicas de transacciones -->
+      </div>
+
+      <div id="history-empty" class="hidden py-16 text-center text-gray-500 space-y-2">
+        <span class="text-3xl block">📋</span>
+        <p class="text-sm">Aún no se ha realizado ninguna organización de archivos.</p>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- 3. TOAST NOTIFICACIONES                     -->
+  <!-- ========================================== -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 max-w-md bg-gray-900 border border-gray-700 shadow-2xl rounded-2xl p-4 flex items-center gap-3">
+    <div id="toast-icon" class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+      ✓
+    </div>
+    <div class="flex-1">
+      <h4 id="toast-title" class="text-xs font-bold text-white">Operación exitosa</h4>
+      <p id="toast-message" class="text-[11px] text-gray-300">Detalles de la acción realizada.</p>
+    </div>
+  </div>
+
+  <!-- Script principal de la aplicación -->
+  <script src="/app.js"></script>
+</body>
+</html>
