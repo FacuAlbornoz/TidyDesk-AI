@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   await checkHealth();
   await loadRules();
   await loadHistory();
+  await loadGuardianStatus();
+  setInterval(loadGuardianStatus, 3000);
 });
 
 // Guardar y cargar Gemini API Key en LocalStorage
@@ -76,26 +78,30 @@ async function checkHealth() {
   }
 }
 
-// 2. Navegación por Pestañas (Organizador / Limpiador / Reglas / Historial)
+// 2. Navegación por Pestañas (Organizador / Guardián / Limpiador / Reglas / Historial)
 function switchTab(tab) {
   const viewOrganizer = document.getElementById("view-organizer");
+  const viewGuardian = document.getElementById("view-guardian");
   const viewCleaner = document.getElementById("view-cleaner");
   const viewRules = document.getElementById("view-rules");
   const viewHistory = document.getElementById("view-history");
   
   const btnOrganizer = document.getElementById("tab-organizer-btn");
+  const btnGuardian = document.getElementById("tab-guardian-btn");
   const btnCleaner = document.getElementById("tab-cleaner-btn");
   const btnRules = document.getElementById("tab-rules-btn");
   const btnHistory = document.getElementById("tab-history-btn");
 
   // Ocultar todas las vistas
   viewOrganizer.classList.add("hidden");
+  if (viewGuardian) viewGuardian.classList.add("hidden");
   if (viewCleaner) viewCleaner.classList.add("hidden");
   viewRules.classList.add("hidden");
   viewHistory.classList.add("hidden");
 
   // Estilos inactivos
   btnOrganizer.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all";
+  if (btnGuardian) btnGuardian.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5";
   if (btnCleaner) btnCleaner.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5";
   btnRules.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5";
   btnHistory.className = "px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all flex items-center gap-1.5";
@@ -103,6 +109,10 @@ function switchTab(tab) {
   if (tab === "organizer") {
     viewOrganizer.classList.remove("hidden");
     btnOrganizer.className = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all";
+  } else if (tab === "guardian") {
+    if (viewGuardian) viewGuardian.classList.remove("hidden");
+    if (btnGuardian) btnGuardian.className = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all flex items-center gap-1.5";
+    loadGuardianStatus();
   } else if (tab === "cleaner") {
     if (viewCleaner) viewCleaner.classList.remove("hidden");
     if (btnCleaner) btnCleaner.className = "px-3.5 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition-all flex items-center gap-1.5";
@@ -872,4 +882,186 @@ async function executeCleanerAction() {
   } catch (err) {
     showError("Fallo en limpieza", err.message);
   }
+}
+
+// ==========================================
+// 11. MODO GUARDIÁN EN SEGUNDO PLANO (V1.4)
+// ==========================================
+let guardianRunning = false;
+
+async function loadGuardianStatus() {
+  try {
+    const res = await fetch("/api/guardian/status");
+    if (!res.ok) return;
+    const status = await res.json();
+    renderGuardianUI(status);
+  } catch (err) {
+    console.error("Error al consultar Guardián:", err);
+  }
+}
+
+function renderGuardianUI(status) {
+  guardianRunning = Boolean(status.running);
+
+  const navDot = document.getElementById("guardian-nav-dot");
+  const statusDot = document.getElementById("guardian-status-dot");
+  const statusText = document.getElementById("guardian-status-text");
+  const heroCard = document.getElementById("guardian-hero-card");
+  const btnToggle = document.getElementById("btn-toggle-guardian");
+  const btnIcon = document.getElementById("btn-toggle-guardian-icon");
+  const btnLabel = document.getElementById("btn-toggle-guardian-label");
+  const sessionCounter = document.getElementById("guardian-session-counter");
+
+  if (navDot) {
+    navDot.className = guardianRunning
+      ? "w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
+      : "w-2 h-2 rounded-full bg-gray-500";
+  }
+
+  if (statusDot && statusText && btnToggle && heroCard) {
+    if (guardianRunning) {
+      statusDot.className = "w-3 h-3 rounded-full bg-emerald-400 animate-ping";
+      statusText.innerHTML = `<span class="text-emerald-300 font-semibold">Vigilando activamente:</span> <code class="bg-gray-800 px-2 py-0.5 rounded text-gray-200">${status.watched_path}</code>. Cualquier archivo descargado será clasificado automáticamente.`;
+      heroCard.className = "bg-emerald-950/20 border border-emerald-500/40 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all";
+      btnToggle.className = "px-6 py-3 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 shadow-lg shadow-rose-600/20 transition-all flex items-center gap-2 shrink-0";
+      btnIcon.innerText = "⏹️";
+      btnLabel.innerText = "Detener Modo Guardián";
+    } else {
+      statusDot.className = "w-3 h-3 rounded-full bg-gray-500";
+      statusText.innerText = "El Guardián está inactivo. Al activarlo, vigilará tu carpeta en segundo plano y organizará automáticamente cada archivo apenas termine de descargarse.";
+      heroCard.className = "bg-gray-900/90 border border-gray-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all";
+      btnToggle.className = "px-6 py-3 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-2 shrink-0";
+      btnIcon.innerText = "▶️";
+      btnLabel.innerText = "Activar Modo Guardián";
+    }
+  }
+
+  // Sincronizar selectores con la configuración actual
+  if (status.config) {
+    const folderEl = document.getElementById("guardian-folder-type");
+    const modeEl = document.getElementById("guardian-mode");
+    const renameEl = document.getElementById("guardian-smart-rename");
+    const notifyEl = document.getElementById("guardian-win-notify");
+
+    if (folderEl && document.activeElement !== folderEl) folderEl.value = status.config.folder_type;
+    if (modeEl && document.activeElement !== modeEl) modeEl.value = status.config.mode;
+    if (renameEl) renameEl.checked = status.config.enable_smart_rename;
+    if (notifyEl) notifyEl.checked = status.config.windows_notifications;
+  }
+
+  if (sessionCounter) {
+    sessionCounter.innerText = `${status.total_processed_session || 0} organizados en esta sesión`;
+  }
+
+  // Renderizar bitácora en vivo
+  const listEl = document.getElementById("guardian-events-list");
+  const emptyEl = document.getElementById("guardian-events-empty");
+  if (!listEl || !emptyEl) return;
+
+  const events = status.events || [];
+  if (events.length === 0) {
+    listEl.innerHTML = "";
+    emptyEl.classList.remove("hidden");
+    return;
+  }
+
+  emptyEl.classList.add("hidden");
+  listEl.innerHTML = "";
+
+  events.forEach((ev) => {
+    const item = document.createElement("div");
+    item.className = "flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-gray-800/60 border border-gray-700/70 text-xs";
+
+    const wasRenamed = ev.new_name && ev.new_name.toLowerCase() !== ev.original_name.toLowerCase();
+
+    item.innerHTML = `
+      <div class="space-y-1">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[10px] font-mono bg-gray-900 text-gray-400 px-2 py-0.5 rounded">${ev.timestamp}</span>
+          <span class="font-bold text-white">${ev.original_name}</span>
+          ${wasRenamed ? `<span class="text-purple-300 font-medium">✏️ → ${ev.new_name}</span>` : ""}
+          <span class="text-brand-400 font-semibold">📁 → ${ev.destination_folder}</span>
+        </div>
+        <p class="text-[11px] text-gray-400">${ev.reason}</p>
+      </div>
+      <div>
+        ${
+          ev.reverted
+            ? `<span class="px-2.5 py-1 rounded-lg bg-gray-700/60 text-gray-400 text-[11px]">Revertido</span>`
+            : `<button type="button" onclick="revertGuardianEvent('${ev.transaction_id}')" class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-semibold transition-all">↩️ Deshacer</button>`
+        }
+      </div>
+    `;
+    listEl.appendChild(item);
+  });
+}
+
+function getGuardianConfigFromInputs(enabledState) {
+  return {
+    enabled: enabledState,
+    folder_type: document.getElementById("guardian-folder-type")?.value || "downloads",
+    mode: document.getElementById("guardian-mode")?.value || "all",
+    enable_smart_rename: document.getElementById("guardian-smart-rename")?.checked ?? true,
+    windows_notifications: document.getElementById("guardian-win-notify")?.checked ?? true,
+  };
+}
+
+async function toggleGuardian() {
+  const targetState = !guardianRunning;
+  const payload = getGuardianConfigFromInputs(targetState);
+
+  try {
+    const res = await fetch("/api/guardian/toggle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error("No se pudo cambiar el estado del Guardián");
+    const status = await res.json();
+    renderGuardianUI(status);
+
+    if (status.running) {
+      showToast("🛡️ Modo Guardián Activado", `Vigilando en tiempo real: ${status.watched_path}`);
+    } else {
+      showToast("Modo Guardián Detenido", "Se pausó el monitoreo automático en segundo plano.");
+    }
+  } catch (err) {
+    showToast("Error en Guardián", err.message, true);
+  }
+}
+
+async function onGuardianConfigChange() {
+  if (!guardianRunning) return;
+  const payload = getGuardianConfigFromInputs(true);
+  try {
+    const res = await fetch("/api/guardian/toggle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      const status = await res.json();
+      renderGuardianUI(status);
+      showToast("Guardián Actualizado", "Se aplicaron los nuevos ajustes en caliente.");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function clearGuardianEvents() {
+  try {
+    const res = await fetch("/api/guardian/clear", { method: "POST" });
+    if (res.ok) {
+      const status = await res.json();
+      renderGuardianUI(status);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function revertGuardianEvent(txId) {
+  await triggerRollback(txId);
+  await loadGuardianStatus();
 }

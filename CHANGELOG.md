@@ -4,17 +4,29 @@ Todas las notas de las versiones y evoluciones del proyecto se documentan en est
 
 ---
 
+## [v1.4.0] - 2026-11-16
+### 🛡️ Modo Guardián en Segundo Plano (Watchdog Daemon)
+- **Servicio Watchdog en Tiempo Real:** Monitoreo continuo y no bloqueante de la carpeta de **Descargas** o **Escritorio** mediante hilos demonios con `watchdog`.
+- **Protección contra Descargas en Curso:** Ignora automáticamente archivos temporales de navegadores (`.crdownload`, `.part`, `.tmp`, `.opdownload`) y verifica la estabilización de bytes y desbloqueo de lectura antes de intervenir.
+- **2 Niveles de Automatización:**
+  - *Clasificación Completa:* Organiza cualquier archivo nuevo combinando Reglas Personalizadas y heurística inteligente.
+  - *Solo Reglas Personalizadas ⭐:* Mueve únicamente los archivos que coincidan con las reglas creadas por el usuario.
+- **Renombrado Multimodal en Vivo:** Renombra al vuelo facturas PDF e imágenes genéricas apenas terminan de descargarse.
+- **Notificaciones Nativas de Windows:** Avisos en la bandeja del sistema de Windows informando qué archivo fue organizado y hacia qué carpeta.
+- **Feed en Tiempo Real con Rollback Instantáneo:** Nueva pestaña `🛡️ Guardián` con bitácora en vivo y botón `↩️ Deshacer` directo en cada evento.
+
+---
+
 ## [v1.3.0] - 2026-11-16
 ### ✨ Renombrado con IA Multimodal (Visión & Extracción de PDFs)
-- **Extracción de Contenido de PDFs:** Integración de pypdf para extraer de forma segura y liviana el texto plano de la primera página de documentos PDF genéricos (download (1).pdf, documento.pdf).
-- **Detección Heurística e IA de Entidades:** Reconocimiento de tipos de comprobante (Factura, Comprobante, Recibo, Constancia, TP), entidades emisoras (EPEC, Telecom, Mercado Pago, AFIP, Itec) y períodos (Noviembre_2026, fechas ISO).
-- **Visión Multimodal para Imágenes:** Integración con Gemini Vision y miniaturas optimizadas (PIL) para describir capturas y fotos genéricas (Screenshot (1).png -> Captura_... o descripción semántica de la pantalla).
+- **Extracción de Contenido de PDFs:** Integración de `pypdf` para extraer de forma segura y liviana el texto plano de la primera página de documentos PDF genéricos (`download (1).pdf`, `documento.pdf`).
+- **Detección Heurística e IA de Entidades:** Reconocimiento de tipos de comprobante (`Factura`, `Comprobante`, `Recibo`, `Constancia`, `TP`), entidades emisoras (`EPEC`, `Telecom`, `Mercado Pago`, `AFIP`, `Universidad`) y períodos (`Noviembre_2026`, fechas ISO).
+- **Visión Multimodal para Imágenes:** Integración con Gemini Vision y miniaturas optimizadas (`PIL`) para describir capturas y fotos genéricas (`Screenshot (1).png` -> `Captura_...` o descripción semántica de la pantalla).
 - **Columna de 'Nuevo Nombre' Editable en Dry-Run:** Nueva columna en la tabla de vista previa con inputs interactivos para revisar o personalizar el nuevo nombre antes de confirmar el movimiento.
-- **Badges Visuales de Renombrado:** Indicadores destacados ✨ Renombrado por IA para que el usuario identifique al instante qué archivos tienen sugerencia de nuevo nombre.
+- **Badges Visuales de Renombrado:** Indicadores destacados `✨ Renombrado por IA` para que el usuario identifique al instante qué archivos tienen sugerencia de nuevo nombre.
 - **Interruptor de Control en Panel:** Switch interactivo en el Paso 1 para activar o desactivar el renombrado multimodal a demanda.
 - **Preservación Segura de Extensiones & Rollback:** Sanitización para evitar pérdida accidental de extensiones y compatibilidad total con el historial de reversión atómica de 1 clic.
-- **Archivo 
-equirements.txt:** Definición estandarizada de dependencias (astapi, uvicorn, pydantic, httpx, pillow, pypdf) para máxima portabilidad entre computadoras.
+- **Archivo `requirements.txt`:** Definición estandarizada de dependencias (`fastapi`, `uvicorn`, `pydantic`, `httpx`, `pillow`, `pypdf`, `watchdog`) para máxima portabilidad entre computadoras.
 
 ---
 
@@ -22,9 +34,9 @@ equirements.txt:** Definición estandarizada de dependencias (astapi, uvicorn, 
 ### 🧹 Detector de Duplicados (SHA-256) & Limpiador Inteligente
 - **Pestaña 'Limpiador' en UI:** Nueva vista integrada para auditar duplicados de almacenamiento e instaladores antiguos.
 - **Fingerprint Criptográfico SHA-256:** Detección de duplicados exactos mediante hash SHA-256, optimizado previamente agrupando por tamaño de bytes para evitar lecturas innecesarias en disco.
-- **Identificación Inteligente de Original vs. Duplicado:** Distingue el archivo original (nombre más canónico/corto) de sus copias redundantes (ej: rchivo (1).pdf o rchivo - copia.pdf).
-- **Detección de Instaladores Antiguos:** Identifica instaladores pesados (.exe, .msi) descargados hace más de 30 días que consumen almacenamiento residual.
-- **Limpieza Segura con Rollback:** Los archivos seleccionados no se eliminan permanentemente; se trasladan a una carpeta de cuarentena segura _Limpieza_TidyDesk y generan un registro de transacción con Rollback atómico de 1 clic.
+- **Identificación Inteligente de Original vs. Duplicado:** Distingue el archivo original (nombre más canónico/corto) de sus copias redundantes (ej: `archivo (1).pdf` o `archivo - copia.pdf`).
+- **Detección de Instaladores Antiguos:** Identifica instaladores pesados (`.exe`, `.msi`) descargados hace más de 30 días que consumen almacenamiento residual.
+- **Limpieza Segura con Rollback:** Los archivos seleccionados no se eliminan permanentemente; se trasladan a una carpeta de cuarentena segura `_Limpieza_TidyDesk` y generan un registro de transacción con Rollback atómico de 1 clic.
 - **Métricas de Espacio Recuperable:** Tarjetas visuales de cálculo instantáneo de MB/GB desperdiciados y espacio total recuperable.
 
 ---
@@ -32,10 +44,10 @@ equirements.txt:** Definición estandarizada de dependencias (astapi, uvicorn, 
 ## [v1.1.0] - 2026-11-16
 ### ⭐ Reglas de Destino Personalizadas & Carpetas Externas
 - **Pestaña de Reglas en UI:** Nueva pestaña dedicada en la barra superior para gestionar reglas con estados activa/pausada y eliminación.
-- **Carpetas Externas Absolutas:** Capacidad de enviar archivos a cualquier disco o carpeta del sistema (ej: `D:\Facu\Impresora 3d` o `D:\Facu\Itec`).
+- **Carpetas Externas Absolutas:** Capacidad de enviar archivos a cualquier disco o carpeta del sistema (ej: `D:\Proyectos\Impresion_3D` o `C:\Mis_Estudios`).
 - **Prioridad Máxima del Usuario:** Las reglas definidas por el usuario tienen precedencia absoluta sobre la IA y sobre reglas generales.
-- **Soporte de Extensiones y Palabras Clave:** Filtros por múltiples extensiones (`.stl, .step, .gcode, .3mf`) o palabras clave (`parcial, tp, seminario, itec`).
-- **Persistencia en `data/rules.json`:** Guardado seguro, dinámico y editable de las directivas del usuario.
+- **Soporte de Extensiones y Palabras Clave:** Filtros por múltiples extensiones (`.stl, .step, .gcode, .3mf`) o palabras clave (`parcial, tp, seminario, factura`).
+- **Persistencia en `data/rules.json`:** Guardado seguro, dinámico y editable de las directivas del usuario (excluido de Git para portabilidad).
 - **Visualización en Dry-Run:** Badges dorados `⭐ Regla Personalizada` y rutas de destino completas en la tabla interactiva de vista previa.
 
 ---
@@ -54,18 +66,5 @@ equirements.txt:** Definición estandarizada de dependencias (astapi, uvicorn, 
 
 ## 🗺️ Roadmap de Próximas Versiones
 
-- **[v1.2.0] Detector de Duplicados & Limpiador Inteligente:**
-  - Comparación de hashes SHA-256 para detectar descargas repetidas (`archivo (1).pdf`).
-  - Detección de instaladores antiguos (`.exe`/`.msi`) para sugerir recuperación de espacio.
-
-- **[v1.3.0] Renombrado con IA Multimodal (Visión & Contenido):**
-  - Análisis de imágenes con IA para renombrar capturas (`Screenshot (1).png` $\rightarrow$ `Diagrama_Arquitectura.png`).
-  - Lectura de texto en PDFs para extraer títulos y fechas de facturas o comprobantes.
-
-- **[v1.4.0] Modo Guardián en Segundo Plano (Watchdog Daemon):**
-  - Monitoreo en tiempo real de Descargas con la librería `watchdog`.
-  - Notificaciones nativas en Windows con botón de deshacer rápido.
-
 - **[v2.0.0] Aplicación de Escritorio Nativa (.exe & System Tray):**
-  - Empaquetado ejecutable sin necesidad de abrir terminal.
-  - Icono en la barra de tareas al lado del reloj.
+  - Empaquetado ejecutable e icono en la bandeja del sistema (System Tray) al lado del reloj de Windows para controlar TidyDesk AI sin tener una consola abierta.

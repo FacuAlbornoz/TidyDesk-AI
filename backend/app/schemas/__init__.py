@@ -17,6 +17,11 @@ from .cleaner import (
     CleanActionRequest,
     CleanActionResponse,
 )
+from .guardian import (
+    GuardianConfig,
+    GuardianEvent,
+    GuardianStatusResponse,
+)
 
 __all__ = [
     "FileItem",
@@ -37,4 +42,7 @@ __all__ = [
     "AuditCleanResponse",
     "CleanActionRequest",
     "CleanActionResponse",
+    "GuardianConfig",
+    "GuardianEvent",
+    "GuardianStatusResponse",
 ]

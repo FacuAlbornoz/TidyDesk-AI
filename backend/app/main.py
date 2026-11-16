@@ -21,12 +21,14 @@ from app.schemas.organize import (
 )
 from app.schemas.rules import CustomRule, CustomRuleCreate
 from app.schemas.cleaner import AuditCleanResponse, CleanActionRequest, CleanActionResponse
+from app.schemas.guardian import GuardianConfig, GuardianStatusResponse
 from app.core.scanner import scan_directory, resolve_target_folder
 from app.core.organizer import execute_plan, rollback_transaction
 from app.core.history import load_history
 from app.core.rules_manager import load_rules, create_rule, delete_rule, toggle_rule
 from app.core.cleaner import audit_clean_directory, execute_clean_action
 from app.core.multimodal import apply_multimodal_renaming
+from app.core.guardian import guardian_manager
 from app.ai.ollama_provider import OllamaProvider
 from app.ai.gemini_provider import GeminiProvider
 from app.ai.rules_provider import SmartRulesProvider
@@ -212,6 +214,31 @@ async def execute_cleaning(request: CleanActionRequest):
         return execute_clean_action(target_path, request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al ejecutar limpieza: {str(e)}")
+
+# ==========================================
+# ENDPOINTS: MODO GUARDIÁN EN SEGUNDO PLANO (V1.4)
+# ==========================================
+
+@app.get("/api/guardian/status", response_model=GuardianStatusResponse)
+async def get_guardian_status():
+    """Devuelve el estado actual del demonio Watchdog y los últimos archivos auto-organizados."""
+    return guardian_manager.get_status()
+
+@app.post("/api/guardian/toggle", response_model=GuardianStatusResponse)
+async def toggle_guardian_mode(config: GuardianConfig):
+    """Activa, actualiza o detiene el Modo Guardián en tiempo real."""
+    try:
+        if config.enabled:
+            return guardian_manager.start(config)
+        else:
+            return guardian_manager.stop()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al configurar Modo Guardián: {str(e)}")
+
+@app.post("/api/guardian/clear", response_model=GuardianStatusResponse)
+async def clear_guardian_events():
+    """Limpia la bitácora de eventos de la sesión actual del Guardián."""
+    return guardian_manager.clear_events()
 
 # Montar frontend para servir la aplicación web en http://localhost:8000
 if FRONTEND_DIR.exists():
