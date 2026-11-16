@@ -64,7 +64,7 @@
         <div>
           <span class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
             TidyDesk <span class="text-brand-400 font-extrabold">AI</span>
-            <span class="text-[10px] bg-brand-500/20 text-brand-300 font-semibold px-2 py-0.5 rounded-full border border-brand-500/30">v2.0</span>
+            <span class="text-[10px] bg-brand-500/20 text-brand-300 font-semibold px-2 py-0.5 rounded-full border border-brand-500/30">v2.1</span>
           </span>
           <span class="text-xs text-gray-400 hidden sm:block">Organizador Inteligente y Seguro de Archivos</span>
         </div>
@@ -127,14 +127,26 @@
             <button type="button" id="btn-folder-desktop" class="folder-select-btn active p-4 rounded-xl border-2 border-brand-500 bg-brand-500/10 text-left transition-all" onclick="selectFolder('desktop')">
               <span class="text-2xl block mb-1">🖥️</span>
               <span class="font-bold text-white block text-sm">Escritorio</span>
-              <span class="text-[11px] text-gray-400" id="path-preview-desktop">C:\Users\...\Desktop</span>
+              <span class="text-[11px] text-gray-400 truncate block" id="path-preview-desktop">C:\Users\...\Desktop</span>
             </button>
             <button type="button" id="btn-folder-downloads" class="folder-select-btn p-4 rounded-xl border border-gray-800 bg-gray-800/40 text-left hover:border-gray-700 transition-all" onclick="selectFolder('downloads')">
               <span class="text-2xl block mb-1">📥</span>
               <span class="font-bold text-white block text-sm">Descargas</span>
-              <span class="text-[11px] text-gray-400" id="path-preview-downloads">C:\Users\...\Downloads</span>
+              <span class="text-[11px] text-gray-400 truncate block" id="path-preview-downloads">C:\Users\...\Downloads</span>
             </button>
           </div>
+
+          <!-- Botón para seleccionar cualquier otra carpeta de Windows -->
+          <button type="button" id="btn-folder-custom" class="folder-select-btn w-full p-3.5 rounded-xl border border-gray-800 bg-gray-800/40 hover:border-brand-500/50 text-left transition-all flex items-center justify-between gap-2" onclick="pickCustomFolderToOrganize()">
+            <div class="flex items-center gap-3 overflow-hidden">
+              <span class="text-xl shrink-0">📂</span>
+              <div class="overflow-hidden">
+                <span class="font-bold text-white block text-xs">Otra Carpeta de tu PC...</span>
+                <span class="text-[11px] text-gray-400 truncate block" id="path-preview-custom">Hacé clic para elegir en el Explorador de Windows</span>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-brand-500/20 text-brand-300 border border-brand-500/30 text-[10px] font-bold shrink-0">Examinar...</span>
+          </button>
 
           <!-- Toggle para Accesos Directos (.lnk) -->
           <div class="p-3.5 rounded-xl bg-gray-800/80 border border-gray-700 space-y-1.5">
@@ -187,11 +199,44 @@
           <!-- Configuración dinámica según proveedor -->
           <div id="provider-config-container" class="text-xs space-y-2">
             <!-- Selector de modelo Ollama -->
-            <div id="ollama-options" class="space-y-1">
-              <label class="text-gray-400">Modelo Ollama:</label>
-              <select id="select-ollama-model" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-xs">
-                <option value="llama3">llama3</option>
-              </select>
+            <div id="ollama-options" class="space-y-2.5">
+              <div>
+                <label class="text-gray-400">Modelo Ollama Activo:</label>
+                <select id="select-ollama-model" class="w-full mt-1 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white text-xs">
+                  <option value="llama3.2:1b">llama3.2:1b (Ultra rápido)</option>
+                  <option value="llama3">llama3</option>
+                </select>
+              </div>
+
+              <!-- Asistente de Auto-Instalación de Ollama (V2.1) -->
+              <div id="ollama-setup-box" class="p-3 rounded-xl bg-indigo-950/30 border border-indigo-500/30 space-y-2">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-bold text-indigo-300 flex items-center gap-1.5">
+                    <span>🦙</span> <span id="ollama-setup-title">Gestor de IA Local (Ollama)</span>
+                  </span>
+                  <span id="ollama-disk-badge" class="text-[10px] text-gray-400"></span>
+                </div>
+                <p id="ollama-setup-desc" class="text-[11px] text-gray-300 leading-tight">
+                  ¿Usás otra PC sin Ollama? Instalalo y descargá un modelo liviano con 1 solo clic.
+                </p>
+                <div class="flex items-center gap-2">
+                  <select id="ollama-install-model-select" class="flex-1 px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-700 text-white text-[11px]">
+                    <option value="llama3.2:1b">llama3.2:1b (~1.3 GB — Ideal toda PC)</option>
+                    <option value="llama3.2:3b">llama3.2:3b (~2.0 GB — Balanceado)</option>
+                    <option value="llama3">llama3:8b (~4.7 GB — Potente)</option>
+                  </select>
+                  <button type="button" id="btn-ollama-autosetup" onclick="triggerOllamaAutoSetup()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold transition-all shrink-0 shadow">
+                    ⚡ Instalar / Bajar
+                  </button>
+                </div>
+                <!-- Barra de progreso en vivo -->
+                <div id="ollama-progress-wrap" class="hidden space-y-1 pt-1">
+                  <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+                    <div id="ollama-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-300" style="width: 5%"></div>
+                  </div>
+                  <p id="ollama-progress-text" class="text-[10px] text-indigo-200 font-mono">Iniciando...</p>
+                </div>
+              </div>
             </div>
             <!-- Campo API Key Gemini -->
             <div id="gemini-options" class="hidden space-y-1">
@@ -420,8 +465,13 @@
             <input type="text" id="rule-input-patterns" placeholder="ej: .stl, .step o parcial, tp" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
           </div>
           <div class="space-y-1">
-            <label class="text-gray-400 font-semibold">Carpeta de Destino (Ruta completa o subcarpeta):</label>
-            <input type="text" id="rule-input-dest" placeholder="ej: D:\Proyectos o Carpeta/Destino" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
+            <label class="text-gray-400 font-semibold">Carpeta de Destino:</label>
+            <div class="flex items-center gap-1.5">
+              <input type="text" id="rule-input-dest" placeholder="Elegí con Examinar o escribí ruta" class="flex-1 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
+              <button type="button" onclick="browseRuleDestFolder()" class="px-3 py-2 rounded-lg bg-brand-600/30 hover:bg-brand-600/50 text-brand-200 border border-brand-500/40 font-bold text-xs shrink-0 transition-all" title="Seleccionar carpeta en el Explorador de Windows">
+                📂 Examinar...
+              </button>
+            </div>
           </div>
         </div>
         
@@ -482,10 +532,17 @@
         <!-- 1. Carpeta Vigilada -->
         <div class="bg-gray-900/70 border border-gray-800/80 rounded-2xl p-5 space-y-3">
           <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">1. Carpeta a Vigilar</h3>
-          <select id="guardian-folder-type" onchange="onGuardianConfigChange()" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
-            <option value="downloads">📥 Carpeta Descargas (Recomendado)</option>
-            <option value="desktop">🖥️ Carpeta Escritorio</option>
-          </select>
+          <div class="flex items-center gap-2">
+            <select id="guardian-folder-type" onchange="onGuardianFolderSelectChange()" class="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+              <option value="downloads">📥 Carpeta Descargas (Recomendado)</option>
+              <option value="desktop">🖥️ Carpeta Escritorio</option>
+              <option value="custom">📂 Otra Carpeta Personalizada...</option>
+            </select>
+            <button type="button" onclick="pickGuardianCustomFolder()" class="px-3 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-xs text-brand-300 font-bold shrink-0" title="Elegir carpeta en Windows">
+              📂 Elegir...
+            </button>
+          </div>
+          <p id="guardian-custom-path-label" class="hidden text-[11px] text-brand-300 font-mono truncate"></p>
           <p class="text-[11px] text-gray-400 leading-relaxed">
             Espera automáticamente a que los navegadores terminen de descargar (<code class="text-gray-300">.crdownload</code> / <code class="text-gray-300">.part</code>) antes de mover el archivo.
           </p>

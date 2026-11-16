@@ -102,7 +102,10 @@ class GuardianManager:
 
     @property
     def watched_path(self) -> Path:
-        return resolve_target_folder(self.config.folder_type)
+        try:
+            return resolve_target_folder(self.config.folder_type, self.config.custom_path)
+        except Exception:
+            return resolve_target_folder("downloads")
 
     @property
     def is_running(self) -> bool:

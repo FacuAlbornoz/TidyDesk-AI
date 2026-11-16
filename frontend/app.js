@@ -1,6 +1,8 @@
 // TidyDesk AI - Frontend Controller (v1.1)
 
 let currentFolderType = "desktop";
+let currentCustomFolderPath = "";
+let guardianCustomFolderPath = "";
 let currentTargetFolder = "";
 let scannedFiles = [];
 let currentPlan = [];
@@ -14,6 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadRules();
   await loadHistory();
   await loadGuardianStatus();
+  await loadOllamaSetupStatus();
   setInterval(loadGuardianStatus, 3000);
 });
 
@@ -127,23 +130,54 @@ function switchTab(tab) {
   }
 }
 
-// 3. Selección de Carpeta (Escritorio / Descargas)
+// 3. Selección de Carpeta (Escritorio / Descargas / Otra Carpeta Personalizada)
 function selectFolder(type) {
   currentFolderType = type;
   const btnDesktop = document.getElementById("btn-folder-desktop");
   const btnDownloads = document.getElementById("btn-folder-downloads");
+  const btnCustom = document.getElementById("btn-folder-custom");
+
+  const inactiveCard = "folder-select-btn p-4 rounded-xl border border-gray-800 bg-gray-800/40 text-left hover:border-gray-700 transition-all";
+  const activeCard = "folder-select-btn active p-4 rounded-xl border-2 border-brand-500 bg-brand-500/10 text-left transition-all";
+
+  if (btnDesktop) btnDesktop.className = type === "desktop" ? activeCard : inactiveCard;
+  if (btnDownloads) btnDownloads.className = type === "downloads" ? activeCard : inactiveCard;
+  if (btnCustom) {
+    btnCustom.className =
+      type === "custom"
+        ? "folder-select-btn active w-full p-3.5 rounded-xl border-2 border-brand-500 bg-brand-500/10 text-left transition-all flex items-center justify-between gap-2"
+        : "folder-select-btn w-full p-3.5 rounded-xl border border-gray-800 bg-gray-800/40 hover:border-brand-500/50 text-left transition-all flex items-center justify-between gap-2";
+  }
 
   if (type === "desktop") {
-    btnDesktop.className = "folder-select-btn active p-4 rounded-xl border-2 border-brand-500 bg-brand-500/10 text-left transition-all";
-    btnDownloads.className = "folder-select-btn p-4 rounded-xl border border-gray-800 bg-gray-800/40 text-left hover:border-gray-700 transition-all";
     currentTargetFolder = defaultFolders.desktop || "";
-  } else {
-    btnDownloads.className = "folder-select-btn active p-4 rounded-xl border-2 border-brand-500 bg-brand-500/10 text-left transition-all";
-    btnDesktop.className = "folder-select-btn p-4 rounded-xl border border-gray-800 bg-gray-800/40 text-left hover:border-gray-700 transition-all";
+  } else if (type === "downloads") {
     currentTargetFolder = defaultFolders.downloads || "";
+  } else if (type === "custom" && currentCustomFolderPath) {
+    currentTargetFolder = currentCustomFolderPath;
   }
 
   hideAllStates();
+}
+
+async function pickCustomFolderToOrganize() {
+  try {
+    const res = await fetch("/api/system/pick-folder?title=Seleccionar+carpeta+a+organizar");
+    if (!res.ok) throw new Error("No se pudo abrir el selector de carpetas");
+    const data = await res.json();
+    if (data.selected && data.path) {
+      currentCustomFolderPath = data.path;
+      const previewEl = document.getElementById("path-preview-custom");
+      if (previewEl) {
+        previewEl.innerText = data.path;
+        previewEl.className = "text-[11px] text-brand-300 font-mono truncate block";
+      }
+      selectFolder("custom");
+      showToast("Carpeta Seleccionada", `Listo para auditar: ${data.path}`);
+    }
+  } catch (err) {
+    showToast("Error al elegir carpeta", err.message, "error");
+  }
 }
 
 function onShortcutsToggleChange() {
@@ -208,6 +242,7 @@ async function startScanAndPlan() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
         folder_type: currentFolderType,
+        custom_path: currentFolderType === "custom" ? currentCustomFolderPath : null,
         include_shortcuts: includeShortcuts
       }),
     });
@@ -727,7 +762,10 @@ async function startCleanerAudit() {
     const res = await fetch("/api/cleaner/audit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ folder_type: currentFolderType }),
+      body: JSON.stringify({
+        folder_type: currentFolderType,
+        custom_path: currentFolderType === "custom" ? currentCustomFolderPath : null,
+      }),
     });
 
     if (!res.ok) throw new Error("Fallo en la auditoría de limpieza");
@@ -997,13 +1035,45 @@ function renderGuardianUI(status) {
 }
 
 function getGuardianConfigFromInputs(enabledState) {
+  const fType = document.getElementById("guardian-folder-type")?.value || "downloads";
   return {
     enabled: enabledState,
-    folder_type: document.getElementById("guardian-folder-type")?.value || "downloads",
+    folder_type: fType,
+    custom_path: fType === "custom" ? guardianCustomFolderPath : null,
     mode: document.getElementById("guardian-mode")?.value || "all",
     enable_smart_rename: document.getElementById("guardian-smart-rename")?.checked ?? true,
     windows_notifications: document.getElementById("guardian-win-notify")?.checked ?? true,
   };
+}
+
+async function onGuardianFolderSelectChange() {
+  const fType = document.getElementById("guardian-folder-type")?.value;
+  if (fType === "custom" && !guardianCustomFolderPath) {
+    await pickGuardianCustomFolder();
+    return;
+  }
+  await onGuardianConfigChange();
+}
+
+async function pickGuardianCustomFolder() {
+  try {
+    const res = await fetch("/api/system/pick-folder?title=Seleccionar+carpeta+a+vigilar+con+Guardian");
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.selected && data.path) {
+      guardianCustomFolderPath = data.path;
+      const sel = document.getElementById("guardian-folder-type");
+      if (sel) sel.value = "custom";
+      const lbl = document.getElementById("guardian-custom-path-label");
+      if (lbl) {
+        lbl.innerText = `📂 ${data.path}`;
+        lbl.classList.remove("hidden");
+      }
+      await onGuardianConfigChange();
+    }
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 async function toggleGuardian() {
@@ -1064,4 +1134,111 @@ async function clearGuardianEvents() {
 async function revertGuardianEvent(txId) {
   await triggerRollback(txId);
   await loadGuardianStatus();
+}
+
+// ==========================================
+// 12. SELECTOR VISUAL DE CARPETAS Y AUTO-SETUP OLLAMA (V2.1)
+// ==========================================
+
+async function browseRuleDestFolder() {
+  try {
+    const res = await fetch("/api/system/pick-folder?title=Seleccionar+Carpeta+de+Destino+para+la+Regla");
+    if (!res.ok) throw new Error("No se pudo abrir el selector de carpetas");
+    const data = await res.json();
+    if (data.selected && data.path) {
+      const destInput = document.getElementById("rule-input-dest");
+      if (destInput) {
+        destInput.value = data.path;
+      }
+      showToast("Carpeta Elegida", data.path);
+    }
+  } catch (err) {
+    showToast("Error al abrir explorador", err.message, "error");
+  }
+}
+
+let ollamaPollTimer = null;
+
+async function loadOllamaSetupStatus() {
+  try {
+    const res = await fetch("/api/ollama/setup-status");
+    if (!res.ok) return;
+    const st = await res.json();
+
+    const diskBadge = document.getElementById("ollama-disk-badge");
+    const titleEl = document.getElementById("ollama-setup-title");
+    const descEl = document.getElementById("ollama-setup-desc");
+    const btnEl = document.getElementById("btn-ollama-autosetup");
+    const progWrap = document.getElementById("ollama-progress-wrap");
+    const progBar = document.getElementById("ollama-progress-bar");
+    const progTxt = document.getElementById("ollama-progress-text");
+
+    if (diskBadge && st.free_disk_gb) {
+      diskBadge.innerText = `Disco libre: ${st.free_disk_gb} GB`;
+    }
+
+    if (st.installed && st.running && st.models && st.models.length > 0 && !st.is_working) {
+      if (titleEl) titleEl.innerText = "Ollama Activo en esta PC";
+      if (descEl) descEl.innerText = `Modelos instalados (${st.models.length}). Podés descargar otro modelo ligero en 1 clic si querés:`;
+      if (btnEl) {
+        btnEl.disabled = false;
+        btnEl.innerText = "⬇️ Descargar Modelo";
+      }
+      if (progWrap && st.setup_state !== "ready") progWrap.classList.add("hidden");
+    } else if (!st.installed && !st.is_working) {
+      if (titleEl) titleEl.innerText = "Ollama no detectado en esta PC";
+      if (descEl) descEl.innerText = "Instalá Ollama y descargá un modelo local automáticamente con 1 solo clic:";
+      if (btnEl) {
+        btnEl.disabled = false;
+        btnEl.innerText = "⚡ Auto-Instalar IA";
+      }
+    }
+
+    if (st.is_working || st.setup_state === "ready" || st.setup_state === "error") {
+      if (progWrap) progWrap.classList.remove("hidden");
+      if (progBar) progBar.style.width = `${st.setup_progress || 5}%`;
+      if (progTxt) progTxt.innerText = st.setup_message || "Procesando...";
+
+      if (st.is_working) {
+        if (btnEl) {
+          btnEl.disabled = true;
+          btnEl.innerText = "Instalando...";
+        }
+        if (!ollamaPollTimer) {
+          ollamaPollTimer = setInterval(loadOllamaSetupStatus, 1500);
+        }
+      } else {
+        if (ollamaPollTimer) {
+          clearInterval(ollamaPollTimer);
+          ollamaPollTimer = null;
+        }
+        if (st.setup_state === "ready") {
+          await checkHealth();
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error consultando setup de Ollama:", err);
+  }
+}
+
+async function triggerOllamaAutoSetup() {
+  const modelSelect = document.getElementById("ollama-install-model-select");
+  const chosenModel = modelSelect ? modelSelect.value : "llama3.2:1b";
+
+  try {
+    const res = await fetch("/api/ollama/auto-setup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: chosenModel }),
+    });
+    if (!res.ok) throw new Error("No se pudo iniciar el instalador automático");
+    showToast("Iniciando Instalación IA", `Configurando Ollama y el modelo ${chosenModel} en segundo plano...`);
+    await loadOllamaSetupStatus();
+    if (!ollamaPollTimer) {
+      ollamaPollTimer = setInterval(loadOllamaSetupStatus, 1500);
+    }
+  } catch (err) {
+    showToast("Error en Auto-Setup", err.message, "error");
+  }
 }

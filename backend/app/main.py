@@ -1,7 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from pydantic import BaseModel
+import io
 
 from app.config import (
     DESKTOP_DIR,
@@ -29,6 +32,11 @@ from app.core.rules_manager import load_rules, create_rule, delete_rule, toggle_
 from app.core.cleaner import audit_clean_directory, execute_clean_action
 from app.core.multimodal import apply_multimodal_renaming
 from app.core.guardian import guardian_manager
+from app.core.system_utils import (
+    pick_folder_dialog,
+    ollama_setup_manager,
+    ensure_ollama_running_if_installed,
+)
 from app.ai.ollama_provider import OllamaProvider
 from app.ai.gemini_provider import GeminiProvider
 from app.ai.rules_provider import SmartRulesProvider
@@ -50,14 +58,15 @@ app.add_middleware(
 
 @app.get("/api/health")
 async def health_check():
-    """Verifica el estado del backend y la disponibilidad de los proveedores de IA."""
+    """Verifica el estado del backend y despierta Ollama automáticamente si está instalado."""
+    ensure_ollama_running_if_installed()
     ollama = OllamaProvider()
     ollama_ok = await ollama.is_available()
     ollama_models = await ollama.get_available_models() if ollama_ok else []
 
     return {
         "status": "healthy",
-        "system": "TidyDesk AI v1.0",
+        "system": "TidyDesk AI v2.1",
         "providers": {
             "ollama": {
                 "available": ollama_ok,
@@ -239,6 +248,44 @@ async def toggle_guardian_mode(config: GuardianConfig):
 async def clear_guardian_events():
     """Limpia la bitácora de eventos de la sesión actual del Guardián."""
     return guardian_manager.clear_events()
+
+# ==========================================
+# ENDPOINTS: INTEGRACIÓN NATIVA WINDOWS & AUTO-SETUP OLLAMA (V2.1)
+# ==========================================
+
+class OllamaAutoSetupRequest(BaseModel):
+    model: str = "llama3.2:1b"
+
+@app.get("/api/system/pick-folder")
+async def pick_native_windows_folder(title: str = "Seleccionar carpeta — TidyDesk AI"):
+    """Abre el diálogo nativo de Windows Explorer para elegir cualquier carpeta sin escribir rutas."""
+    chosen = pick_folder_dialog(title)
+    if not chosen:
+        return {"selected": False, "path": "", "name": ""}
+    p = Path(chosen)
+    return {"selected": True, "path": str(p), "name": p.name or str(p)}
+
+@app.get("/api/ollama/setup-status")
+async def get_ollama_setup_status():
+    """Consulta si Ollama está instalado en el sistema, el espacio en disco y el progreso de descarga."""
+    return ollama_setup_manager.get_status()
+
+@app.post("/api/ollama/auto-setup")
+async def trigger_ollama_auto_setup(req: OllamaAutoSetupRequest):
+    """Inicia la descarga e instalación automática de Ollama + el modelo ligero elegido."""
+    return ollama_setup_manager.start_auto_setup(req.model)
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def serve_favicon():
+    """Genera un icono .ico en memoria para la ventana de aplicación nativa de Windows."""
+    from PIL import Image, ImageDraw
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rounded_rectangle([(2, 2), (30, 30)], radius=7, fill=(79, 70, 229, 255))
+    draw.rounded_rectangle([(7, 11), (25, 23)], radius=3, fill=(255, 255, 255, 240))
+    buf = io.BytesIO()
+    img.save(buf, format="ICO")
+    return Response(content=buf.getvalue(), media_type="image/x-icon")
 
 # Montar frontend para servir la aplicación web en http://localhost:8000
 if FRONTEND_DIR.exists():

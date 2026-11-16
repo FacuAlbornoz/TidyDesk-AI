@@ -4,6 +4,20 @@ Todas las notas de las versiones y evoluciones del proyecto se documentan en est
 
 ---
 
+## [v2.1.0] - 2026-11-16
+### 🪟 Edición Escritorio Nativo, Selector Visual de Carpetas & Auto-Instalador Ollama
+- **Ventana de Aplicación Nativa (Sin barras de navegador):** Al abrir el `.exe` o desde el icono de la bandeja del sistema, la interfaz se lanza como una ventana independiente de escritorio (`--app`) con su propio icono `.ico` y barra de título de Windows, sin barra de direcciones ni pestañas.
+- **Selector Visual de Carpetas de Windows (`📂 Examinar...`):**
+  - En el **Paso 1 (Seleccionar Carpeta)**: Nueva tarjeta `📂 Otra Carpeta de tu PC...` que abre el diálogo nativo del Explorador de Windows (`TopMost`) para auditar, organizar o limpiar cualquier carpeta o disco.
+  - En **Reglas Personalizadas**: Botón `📂 Examinar...` junto al campo de destino para elegir la carpeta con un clic sin escribir rutas a mano.
+  - En **Modo Guardián**: Posibilidad de vigilar cualquier carpeta personalizada de la PC.
+- **Auto-Instalador de Ollama y Descarga de Modelos en 1 Clic (`system_utils.py`):**
+  - Despierta automáticamente el servicio local de Ollama (`ollama serve`) si está instalado pero apagado.
+  - Si se ejecuta en una PC que no tiene Ollama, descarga `OllamaSetup.exe`, lo instala silenciosamente y descarga el modelo ligero elegido (`llama3.2:1b`, `llama3.2:3b` o `llama3`) mostrando una barra de progreso en tiempo real y el espacio libre en disco.
+- **Actualización Sin Desinstalar:** El ejecutable `dist/TidyDesk_AI.exe` actualiza solo el binario conservando intacta la carpeta `data/` con las reglas y el historial del usuario.
+
+---
+
 ## [v2.0.0] - 2026-11-16
 ### 🖥️ Aplicación de Escritorio Nativa (.exe & System Tray)
 - **Controlador de Bandeja del Sistema (`backend/tray_app.py`):** Integración nativa con la bandeja del sistema de Windows (al lado del reloj) mediante `pystray`.

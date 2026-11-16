@@ -3,7 +3,8 @@ from typing import List, Optional
 
 class GuardianConfig(BaseModel):
     enabled: bool = Field(False, description="Estado activo/inactivo del Modo Guardián")
-    folder_type: str = Field("downloads", description="'downloads' o 'desktop'")
+    folder_type: str = Field("downloads", description="'downloads', 'desktop' o 'custom'")
+    custom_path: Optional[str] = Field(None, description="Ruta absoluta si folder_type es 'custom'")
     mode: str = Field(
         "all",
         description="'custom_only' (solo reglas personalizadas) o 'all' (reglas + clasificación inteligente)"

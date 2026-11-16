@@ -55,6 +55,7 @@ Puedes consultar el detalle técnico de cada versión en **[CHANGELOG.md](CHANGE
 * **[v1.3.0]** ✅ Renombrado inteligente con IA multimodal (visión en imágenes y lectura de PDFs).
 * **[v1.4.0]** ✅ Modo Guardián en segundo plano (Watchdog) con notificaciones nativas de Windows.
 * **[v2.0.0]** ✅ App de escritorio con icono en la bandeja del sistema (System Tray), lanzador silencioso y compilador `.exe`.
+* **[v2.1.0]** ✅ Ventana nativa de escritorio (`--app`), selector visual de carpetas de Windows (`📂 Examinar...`) y auto-instalador de Ollama + modelos en 1 clic.
 
 ---
 
@@ -70,6 +71,7 @@ Puedes consultar el detalle técnico de cada versión en **[CHANGELOG.md](CHANGE
 │   │   │   ├── cleaner.py         # Detección SHA-256 y limpieza segura
 │   │   │   ├── multimodal.py      # Renombrado inteligente con visión y lectura PDF
 │   │   │   ├── guardian.py        # Demonio Watchdog en tiempo real y notificaciones
+│   │   │   ├── system_utils.py    # Diálogo nativo de carpetas Windows y Auto-Setup Ollama
 │   │   │   ├── rules_manager.py   # Motor de reglas personalizadas del usuario
 │   │   │   ├── organizer.py       # Movimiento atómico y resolución de colisiones
 │   │   │   └── history.py         # Bitácora de transacciones para rollback

@@ -1,8 +1,10 @@
 import os
 import sys
 import time
+import shutil
 import socket
 import threading
+import subprocess
 import webbrowser
 from pathlib import Path
 from PIL import Image, ImageDraw
@@ -34,6 +36,36 @@ def is_port_in_use(port: int = PORT) -> bool:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.settimeout(0.3)
         return s.connect_ex(("127.0.0.1", port)) == 0
+
+
+def open_native_app_window(url: str = APP_URL) -> None:
+    """Abre TidyDesk AI como ventana de aplicación de escritorio nativa (sin barra de URL ni pestañas)."""
+    candidates = [
+        shutil.which("msedge"),
+        r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+        r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+        shutil.which("chrome"),
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        shutil.which("brave"),
+        r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe",
+    ]
+    for bin_path in candidates:
+        if bin_path and os.path.exists(bin_path):
+            try:
+                creation_flags = getattr(subprocess, "CREATE_NO_WINDOW", 0x08000000)
+                subprocess.Popen(
+                    [bin_path, f"--app={url}", "--window-size=1280,840"],
+                    creationflags=creation_flags,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                return
+            except Exception:
+                continue
+
+    # Fallback en caso extremo
+    webbrowser.open(url)
 
 
 def create_tray_icon_image(guardian_active: bool = False) -> Image.Image:
@@ -101,8 +133,8 @@ class TidyDeskTrayApp:
             time.sleep(0.1)
 
     def on_open_dashboard(self, icon=None, item=None):
-        """Abre la interfaz web en el navegador predeterminado."""
-        webbrowser.open(APP_URL)
+        """Abre la interfaz en una ventana de aplicación nativa de escritorio."""
+        open_native_app_window(APP_URL)
 
     def on_toggle_guardian(self, icon, item):
         """Activa o pausa el Modo Guardián directamente desde el System Tray."""
@@ -161,20 +193,25 @@ class TidyDeskTrayApp:
         )
 
     def run(self):
+        if is_port_in_use(PORT):
+            # Si ya hay una instancia corriendo en segundo plano, simplemente abrir la ventana nativa
+            open_native_app_window(APP_URL)
+            return
+
         self.start_backend_server()
 
         if self.open_browser_on_start:
-            webbrowser.open(APP_URL)
+            open_native_app_window(APP_URL)
 
         send_windows_toast(
-            "🗂️ TidyDesk AI v2.0 Iniciado",
-            "Ejecutándose en la bandeja del sistema (junto al reloj de Windows).",
+            "🗂️ TidyDesk AI v2.1 Iniciado",
+            "Ejecutándose como App Nativa y en la bandeja del sistema.",
         )
 
         self.icon = pystray.Icon(
             name="TidyDeskAI",
             icon=create_tray_icon_image(guardian_active=guardian_manager.is_running),
-            title="TidyDesk AI v2.0 — Organizador Inteligente",
+            title="TidyDesk AI v2.1 — Organizador Inteligente",
             menu=self.build_menu(),
         )
         self.icon.run()
