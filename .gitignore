@@ -42,3 +42,7 @@ $RECYCLE.BIN/
 # Temporary test scripts
 test_*.py
 debug_*.py
+
+# Local user data (history and custom rules per PC)
+data/*.json
+!data/.gitkeep

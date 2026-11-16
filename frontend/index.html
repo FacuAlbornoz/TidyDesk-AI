@@ -292,7 +292,7 @@
             <span class="text-[10px] font-bold bg-brand-500/20 text-brand-300 px-2.5 py-0.5 rounded-full border border-brand-500/30">V1.1</span>
           </h2>
           <p class="text-xs text-gray-400 mt-0.5 max-w-2xl">
-            Definí reglas fijas para enviar archivos a carpetas externas (ej: archivos 3D a <code class="text-brand-300">D:\Facu\Impresora 3d</code> o entregas a <code class="text-brand-300">D:\Facu\Itec</code>). Tus reglas tienen prioridad absoluta sobre la IA.
+            Definí reglas fijas para enviar archivos a carpetas específicas de tu sistema o discos externos. Tus reglas tienen prioridad absoluta sobre la IA.
           </p>
         </div>
         <button type="button" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-brand-600/30" onclick="toggleNewRuleModal(true)">
@@ -308,30 +308,28 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
           <div class="space-y-1">
             <label class="text-gray-400 font-semibold">Nombre de la Regla:</label>
-            <input type="text" id="rule-input-name" placeholder="Ej: Impresión 3D" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
+            <input type="text" id="rule-input-name" placeholder="Ej: Mis Diseños o Facultad" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
           </div>
           <div class="space-y-1">
             <label class="text-gray-400 font-semibold">Tipo de Filtro:</label>
             <select id="rule-input-type" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500">
-              <option value="extension">Por Extensión (ej: .stl, .gcode)</option>
-              <option value="keyword">Por Palabra Clave (ej: parcial, tp, factura)</option>
+              <option value="extension">Por Extensión (ej: .stl, .pdf, .zip)</option>
+              <option value="keyword">Por Palabra Clave (ej: parcial, factura, proyecto)</option>
             </select>
           </div>
           <div class="space-y-1">
             <label class="text-gray-400 font-semibold">Patrones (separados por coma):</label>
-            <input type="text" id="rule-input-patterns" placeholder="ej: .stl, .step, .gcode" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
+            <input type="text" id="rule-input-patterns" placeholder="ej: .stl, .step o parcial, tp" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
           </div>
           <div class="space-y-1">
-            <label class="text-gray-400 font-semibold">Carpeta de Destino (Ruta completa):</label>
-            <input type="text" id="rule-input-dest" placeholder="ej: D:\Facu\Impresora 3d" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
+            <label class="text-gray-400 font-semibold">Carpeta de Destino (Ruta completa o subcarpeta):</label>
+            <input type="text" id="rule-input-dest" placeholder="ej: D:\Proyectos o Carpeta/Destino" class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-brand-500" />
           </div>
         </div>
         
-        <!-- Accesos rápidos a carpetas de Facu -->
         <div class="flex items-center gap-2 pt-1 text-[11px] text-gray-400">
-          <span>Sugerencias rápidas:</span>
-          <button type="button" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 rounded text-brand-300 border border-gray-700" onclick="setQuickDest('D:\\Facu\\Impresora 3d')">📁 Impresora 3D</button>
-          <button type="button" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 rounded text-brand-300 border border-gray-700" onclick="setQuickDest('D:\\Facu\\Itec')">📁 ITEC / Facultad</button>
+          <span>Tip de ruta:</span>
+          <span class="text-gray-500">Podés indicar cualquier ruta absoluta de tu disco (ej: <code class="text-brand-300">D:\MiCarpeta</code>) o una subcarpeta relativa.</span>
         </div>
 
         <div class="flex justify-end gap-2 pt-2 border-t border-gray-800">
